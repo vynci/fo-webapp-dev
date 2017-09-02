@@ -1,0 +1,127 @@
+<div>
+    <div class="row">
+        <div class="col col-sm-12 add-widget-container">
+            <button type="button" class="btn btn-primary" (click)="open(content)"><i class="fa fa-plus"></i> Add Widget</button>            
+        </div>
+    </div>
+    <div class="row" *ngFor="let sensor of testData">
+        <div class="col col-sm-12">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col col-sm-6">
+                            {{sensor.name}}
+                        </div>
+                        <div class="col col-sm-6" style="text-align:right;">
+                            <button type="button" class="btn btn-sm btn-info" (click)="open(editWidgetContent)"><i class="fa fa-cog"></i></button>
+                            <button type="button" class="btn btn-sm btn-danger" (click)="open(deleteWidgetContent)"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>                    
+                </div>
+                <div class="card-block">
+                    <div class="row">
+                        <div class="col col-sm-6">
+                            <div class="label-graph"><b>Roll</b>: {{sensor.rollChart[0].data[0] || 'n/a'}}°</div>
+                            <canvas baseChart height="90" [datasets]="sensor.rollChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                            </canvas>
+                            <br>
+                            <div class="label-graph"><b>Pitch</b>: {{sensor.pitchChart[0].data[0] || 'n/a'}}°</div>
+                            <canvas baseChart height="90" [datasets]="sensor.pitchChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                            </canvas>                                                         
+                        </div>
+                        <div class="col col-sm-6" style="text-align:center;">
+                            <img src="assets/images/3dtemp.png" style="width:75%;" class="user-avatar" />
+                        </div>                    
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- modal templates -->
+
+<ng-template #content let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Sensor Widget</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+            <form role="form">
+                <fieldset class="form-group">
+                    <label>ID</label>
+                    <input class="form-control" placeholder="ex: 1234-5678-90">
+                </fieldset>
+                <fieldset class="form-group">
+                        <label>Name</label>
+                        <input class="form-control" placeholder="ex: Sensor A">
+                </fieldset>                            
+            </form>                                
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="c('Close click')">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template>
+
+<ng-template #editWidgetContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Widget Settings</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <h5>Treshold Values</h5>
+        <br>
+        <div class="row">
+            <div class="col col-sm-6">
+                <form role="form">
+                    <fieldset class="form-group">
+                        <label>Roll (min)</label>
+                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label>Pitch (min)</label>
+                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>                            
+                </form> 
+            </div>  
+            <div class="col col-sm-6">
+                <form role="form">
+                    <fieldset class="form-group">
+                        <label>Roll (max)</label>
+                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>
+                    <fieldset class="form-group">
+                        <label>Pitch (max)</label>
+                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>                            
+                </form> 
+            </div>  
+        </div>
+                               
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="c('Close click')">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template> 
+
+<ng-template #deleteWidgetContent let-c="close" let-d="dismiss">
+        <div class="modal-header">
+            <h4 class="modal-title">Delete Widget</h4>
+            <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Do you want to continue?</p>                               
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" (click)="c('Close click')">Delete</button>
+            <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+        </div>
+    </ng-template>
