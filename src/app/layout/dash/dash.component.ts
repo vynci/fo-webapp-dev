@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorStreamService } from './sensorStream.service';
+import { WidgetService } from '../../services/widget.service';
+import { WidgetSettingService } from '../../services/widgetSetting.service';
 
 @Component({
     selector: 'app-charts',
     templateUrl: './dash.component.html',
     styleUrls: ['./dash.component.scss'],
     animations: [routerTransition()],
-    providers: [SensorStreamService]
+    providers: [SensorStreamService, WidgetService, WidgetSettingService]
 })
 export class DashComponent implements OnInit {
 
@@ -18,11 +20,29 @@ export class DashComponent implements OnInit {
 
     constructor(
         private modalService: NgbModal,
-        private sensorStreamService: SensorStreamService
+        private _sensorStreamService: SensorStreamService,
+        private _widgetService: WidgetService,
+        private _widgetSettingService: WidgetSettingService
     ){}
 
     private pitchTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
     private rollTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
+
+    public newWidget:any = {
+        sensorId: '',
+        dashboardId: '0',
+        type: 'motion-sensor',
+        description: 'default'
+    }
+
+    public newWidgetSetting:any = {
+        widgetId: '',
+        rollMin: -90,
+        rollMax: 90,
+        pitchMin: -90,
+        pitchMax: 90,
+        isDegrees: true,
+    }    
 
     private intervalProcess:any = {};
 
@@ -58,7 +78,7 @@ export class DashComponent implements OnInit {
     };
 
     public pitchChartColor: Array<any> = [
-        { // grey
+        { // green
             backgroundColor: '#2ecc71',
             borderColor: '#2ecc71',
             pointBackgroundColor: 'gray',
@@ -69,7 +89,7 @@ export class DashComponent implements OnInit {
     ];
 
     public rollChartColor: Array<any> = [
-        { // grey
+        { // blue
             backgroundColor: '#3498db',
             borderColor: '#3498db',
             pointBackgroundColor: 'gray',
@@ -104,10 +124,6 @@ export class DashComponent implements OnInit {
             ]   
         }        
     ];
-
-    private getRandomArbitrary(min:any, max:any): any {
-        return Math.random() * (max - min) + min;
-    }
 
     // events
     public chartClicked(e: any): void {
@@ -145,22 +161,57 @@ export class DashComponent implements OnInit {
         return result;
     }
 
+	private fetchWidgets():void{
+        this._widgetService.getAll()
+        .subscribe(data => {
+            
+        });
+    }  
+
+    public createWidget():void{
+        console.log(this.newWidget);
+		this._widgetService.create(this.newWidget)
+		.subscribe(data => {
+            this._widgetSettingService.create(this.newWidgetSetting)
+            .subscribe(data => {
+                this.fetchWidgets();
+            });            
+		});          
+    }
+
+    public fetchWidgetSetting():void{
+        this._widgetSettingService.getByWidgetId('123')
+        .subscribe(data => {
+            this.fetchWidgets();
+        });        
+    }  
+
+    public updateWidgetSetting():void{
+        this._widgetSettingService.update({})
+        .subscribe(data => {
+            this.fetchWidgets();
+        });        
+    }    
+
+    public deleteWidget():void{
+        var widgetId = '0';
+        var widgetSettingId = '0';
+
+		this._widgetService.delete(widgetId)
+		.subscribe(data => {
+            this._widgetSettingService.delete(widgetSettingId)
+            .subscribe(data => {
+                this.fetchWidgets();
+            });            
+		});    
+    }
+
     ngOnInit() {
-        // this.intervalProcess = setInterval(() => {
-        //     this.data.unshift(this.data[9]);
-        //     this.data.pop();
-
-        //     const clone = JSON.parse(JSON.stringify(this.testData[0].pitchChart));
-        //     clone[0].data = this.data;
-        //     this.testData[0].pitchChart = clone;
-
-        // }, 250);
-
-        this.connection = this.sensorStreamService.getMessages().subscribe(message => {
+        this.connection = this._sensorStreamService.getMessages().subscribe(message => {
             var tmp = message.toString();
             var buffer = tmp.split(',');
-            var roll = parseFloat(buffer[2]);
-            var pitch = parseFloat(buffer[1]);
+            var roll = parseFloat(buffer[3]);
+            var pitch = parseFloat(buffer[2]);
 
             this.pitchTmpData.unshift(this.radiansToDegrees(pitch));
             this.pitchTmpData.pop();
@@ -181,7 +232,11 @@ export class DashComponent implements OnInit {
 	ngOnDestroy() {
 		if (this.intervalProcess) {
 			clearInterval(this.intervalProcess);
-		}
+        }
+
+        if(this.connection){
+            this.connection.unsubscribe();
+        }        
 	}
     
 }

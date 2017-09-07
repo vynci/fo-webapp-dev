@@ -5,12 +5,9 @@
             <div class="form-group">
                 <div class="input-group">
                     <label for="" style="margin-right: 5px;"><b>From:</b></label>
-                    <input class="form-control" placeholder="yyyy-mm-dd"
-                        name="dp" [(ngModel)]="fromModel" ngbDatepicker #d1="ngbDatepicker">
-                    <div class="input-group-addon" (click)="d1.toggle()" >
-                        <span class="fa fa-calendar"></span>
-                    </div>
-                </div>
+                    <button type="button" class="btn btn-outline-primary btn-block"  (click)="openDateFilterModal('From'); open(content)">{{formatDate(dateFilter.from)}}</button>
+                </div>                
+
             </div>
         </form>
     </div>
@@ -18,20 +15,16 @@
         <form class="form-inline mb-4">
             <div class="form-group">
                 <div class="input-group">
-                        <label for="" style="margin-right: 5px;"><b>To:</b></label>
-                    <input class="form-control" placeholder="yyyy-mm-dd"
-                        name="dp" [(ngModel)]="toModel" ngbDatepicker #d2="ngbDatepicker">
-                    <div class="input-group-addon" (click)="d2.toggle()" >
-                        <span class="fa fa-calendar"></span>
-                    </div>
-                </div>
+                    <label for="" style="margin-right: 5px;"><b>To:</b></label>
+                    <button type="button" class="btn btn-outline-primary btn-block"  (click)="openDateFilterModal('To'); open(content)">{{formatDate(dateFilter.to)}}</button>
+                </div>   
             </div>
         </form>         
     </div>
     <div class="col-sm-3">
         <div class="form-group">
             <select class="form-control">
-                <option>All</option>
+                <option value="" selected disabled>Choose Sensor</option>
                 <option>Sensor A</option>
                 <option>Sensor B</option>
                 <option>Sensor C</option>
@@ -62,443 +55,67 @@
                         Report for Sensor A
                     </div>
                     <div class="col col-sm-6" style="text-align:right;">
-                        <button type="button" class="btn btn-sm btn-danger">PDF</button>
-                        <button type="button" class="btn btn-sm btn-warning">CSV</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger">PDF</button>
+                        <button type="button" (click)="downloadCSV()" class="btn btn-sm btn-outline-warning">CSV</button>
                     </div>
                 </div>                
             </div>
             <div class="card-block table-responsive">
-                <table class="table table-bordered">
+                <div>
+                    <p *ngIf="sensorLogs == 0" style="text-align:center;">No Results Found. Please try again with other sensors or date range.</p>
+                </div>
+                <table *ngIf="sensorLogs != 0" class="table table-bordered table-hover table-striped">
                     <thead>
                     <tr>
                         <th>Date</th>
+                        <th>Heading</th>
                         <th>Pitch</th>
                         <th>Roll</th>
-                        <th>Heading</th>
                     </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Aug 30, 2017 14:30</td>
-                            <td>30.45</td>
-                            <td>15.32</td>
-                            <td>45.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:30</td>
-                            <td>22.45</td>
-                            <td>15.32</td>
-                            <td>45.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:31</td>
-                            <td>30.45</td>
-                            <td>25.42</td>
-                            <td>46.21</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:32</td>
-                            <td>18.45</td>
-                            <td>14.32</td>
-                            <td>43.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:33</td>
-                            <td>32.45</td>
-                            <td>16.32</td>
-                            <td>45.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:34</td>
-                            <td>30.45</td>
-                            <td>15.32</td>
-                            <td>45.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:35</td>
-                            <td>17.45</td>
-                            <td>17.32</td>
-                            <td>41.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:36</td>
-                            <td>15.45</td>
-                            <td>15.32</td>
-                            <td>45.22</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:37</td>
-                            <td>29.45</td>
-                            <td>19.12</td>
-                            <td>35.21</td>
-                        </tr>
-                        <tr>
-                            <td>Aug 30, 2017 14:38</td>
-                            <td>32.45</td>
-                            <td>11.42</td>
-                            <td>43.22</td>
-                        </tr>                                                                                                        
+                        <tr *ngFor="let log of sensorLogs">
+                            <td>{{formatDate(log.createdDate)}}</td>
+                            <td>{{log.heading}}</td>
+                            <td>{{log.pitch}}</td>
+                            <td>{{log.roll}}</td>
+                        </tr>                                                                                                       
                     </tbody>
                 </table>
-                <ngb-pagination [collectionSize]="120" [(page)]="advancedPagination" [maxSize]="5" [rotate]="true" [boundaryLinks]="true"></ngb-pagination>
-                
+                <ngb-pagination *ngIf="sensorLogs != 0" [collectionSize]="collectionSize" [(page)]="currentPage" (pageChange)="onPageChange($event)" [pageSize]="tableRowLimit" [maxSize]="5" [rotate]="true" [boundaryLinks]="true"></ngb-pagination>
+                <span>Total Results: <b>{{collectionSize || 0}}</b></span>
             </div>
         </div>        
     </div>
 </div>
 
+<!-- modal templates -->
 
-    <!-- <app-page-header [heading]="'Tables'" [icon]="'fa-table'"></app-page-header>
-    <div class="row">
-        <div class="col col-xl-6 col-lg-12">
-            <div class="card mb-3">
-                <div class="card-header">
-                    Basic example
-                </div>
-                <div class="card-block table-responsive">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Table head options</div>
-                <div class="card-block table-responsive">
-                    <table class="table">
-                        <thead class="thead-inverse">
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <table class="table">
-                        <thead class="thead-default">
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Bordered table</div>
-                <div class="card-block table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@TwBootstrap</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">4</th>
-                            <td colspan="2">Larry the Bird</td>
-                            <td>@twitter</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Small table</div>
-                <table class="table table-sm">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Username</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    </tbody>
-                </table>
+<ng-template #content let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">{{dateFilterType}}</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <h5>Date</h5>
+        <div class="input-group">
+            <input class="form-control" placeholder="yyyy-mm-dd"
+                name="dp" [(ngModel)]="dateModel" ngbDatepicker #d1="ngbDatepicker">
+            <div class="input-group-addon" (click)="d1.toggle()" >
+                <span class="fa fa-calendar"></span>
             </div>
         </div>
-        <div class="col col-xl-6 col-lg-12">
-            <div class="card mb-3">
-                <div class="card-header">Inverse table</div>
-                <div class="card-block table-responsive">
-                    <table class="table table-inverse">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Striped Rows</div>
-                <div class="card-block table-responsive">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                        <tr>
-                            <th>Page</th>
-                            <th>Visits</th>
-                            <th>% New Visits</th>
-                            <th>Revenue</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>/index.html</td>
-                            <td>1265</td>
-                            <td>32.3%</td>
-                            <td>$321.33</td>
-                        </tr>
-                        <tr>
-                            <td>/about.html</td>
-                            <td>261</td>
-                            <td>33.3%</td>
-                            <td>$234.12</td>
-                        </tr>
-                        <tr>
-                            <td>/sales.html</td>
-                            <td>665</td>
-                            <td>21.3%</td>
-                            <td>$16.34</td>
-                        </tr>
-                        <tr>
-                            <td>/blog.html</td>
-                            <td>9516</td>
-                            <td>89.3%</td>
-                            <td>$1644.43</td>
-                        </tr>
-                        <tr>
-                            <td>/404.html</td>
-                            <td>23</td>
-                            <td>34.3%</td>
-                            <td>$23.52</td>
-                        </tr>
-                        <tr>
-                            <td>/services.html</td>
-                            <td>421</td>
-                            <td>60.3%</td>
-                            <td>$724.32</td>
-                        </tr>
-                        <tr>
-                            <td>/blog/post.html</td>
-                            <td>1233</td>
-                            <td>93.2%</td>
-                            <td>$126.34</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Hoverable rows</div>
-                <table class="card-block table table-hover">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Username</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">3</th>
-                        <td colspan="2">Larry the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="card mb-3">
-                <div class="card-header">Contextual classes</div>
-                <table class="card-block table">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Username</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr class="table-active">
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                    </tr>
-                    <tr class="table-success">
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                    </tr>
-                    <tr class="table-info">
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    <tr class="table-warning">
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    <tr class="table-danger">
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div> -->
+        <br>
+        <h5>Time</h5>
+        <ngb-timepicker [(ngModel)]="timeModel" [meridian]="meridian"></ngb-timepicker>
+        
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="applyDateFilter(); c('Close click')">Apply</button>
+        <button type="button" class="btn btn-secondary" (click)="applyDateFilter(); c('Close click')">Cancel</button>
+    </div>
+</ng-template>
 
 

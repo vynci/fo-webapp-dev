@@ -13,8 +13,8 @@
                             {{sensor.name}}
                         </div>
                         <div class="col col-sm-6" style="text-align:right;">
-                            <button type="button" class="btn btn-sm btn-info" (click)="open(editWidgetContent)"><i class="fa fa-cog"></i></button>
-                            <button type="button" class="btn btn-sm btn-danger" (click)="open(deleteWidgetContent)"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-info" (click)="open(editWidgetContent)"><i class="fa fa-cog"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" (click)="open(deleteWidgetContent)"><i class="fa fa-trash"></i></button>
                         </div>
                     </div>                    
                 </div>
@@ -49,19 +49,19 @@
         </button>
     </div>
     <div class="modal-body">
-            <form role="form">
-                <fieldset class="form-group">
-                    <label>ID</label>
-                    <input class="form-control" placeholder="ex: 1234-5678-90">
-                </fieldset>
-                <fieldset class="form-group">
-                        <label>Name</label>
-                        <input class="form-control" placeholder="ex: Sensor A">
-                </fieldset>                            
-            </form>                                
+        <form role="form">
+            <fieldset class="form-group">
+                <label>ID</label>
+                <input class="form-control" placeholder="ex: 1234-5678-90" [(ngModel)]="newWidget.sensorId" name="sensorId" >
+            </fieldset>
+            <fieldset class="form-group">
+                <label>Name</label>
+                <input class="form-control" placeholder="ex: Sensor A" [(ngModel)]="newWidget.name" name="name" >
+            </fieldset>                            
+        </form>                                
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="c('Close click')">Save</button>
+        <button type="button" class="btn btn-primary" (click)="createWidget(); c('Close click')">Save</button>
         <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
     </div>
 </ng-template>
@@ -111,17 +111,17 @@
 </ng-template> 
 
 <ng-template #deleteWidgetContent let-c="close" let-d="dismiss">
-        <div class="modal-header">
-            <h4 class="modal-title">Delete Widget</h4>
-            <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <p>Do you want to continue?</p>                               
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-danger" (click)="c('Close click')">Delete</button>
-            <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
-        </div>
-    </ng-template>
+    <div class="modal-header">
+        <h4 class="modal-title">Delete Widget</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Do you want to continue?</p>                               
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-danger" (click)="deleteWidget(); c('Close click')">Delete</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template>

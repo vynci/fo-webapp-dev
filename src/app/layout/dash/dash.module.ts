@@ -7,13 +7,16 @@ import { DashRoutingModule } from './dash-routing.module';
 import { DashComponent } from './dash.component';
 import { PageHeaderModule } from '../../shared';
 
+import { FormsModule } from '@angular/forms';
+
 @NgModule({
     imports: [
         CommonModule,
         Ng2Charts,
         NgbModule.forRoot(),
         DashRoutingModule,
-        PageHeaderModule
+        PageHeaderModule,
+        FormsModule
     ],
     declarations: [DashComponent]
 })
