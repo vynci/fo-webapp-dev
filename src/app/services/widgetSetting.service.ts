@@ -1,5 +1,6 @@
 import { Injectable }    from '@angular/core';
 import { Headers, Http, Response, RequestOptions, URLSearchParams} from '@angular/http';
+import { Config } from './env.config';
 
 import 'rxjs/add/operator/map';
 
@@ -7,7 +8,7 @@ import 'rxjs/add/operator/map';
 export class WidgetSettingService {
 
 	private headers = new Headers({'Content-Type': 'application/json'});
-	private endpoint = 'http://localhost:3000/v1/api/';
+	private endpoint = Config;
 	private url = this.endpoint + 'widget-setting';
 	private options = new RequestOptions({ headers: this.headers});
 
@@ -21,9 +22,9 @@ export class WidgetSettingService {
     }
     
 	getByWidgetId(id:string){
-		let options = new RequestOptions({ headers: this.headers});
+		var url = this.url + '/' + id;
 
-		return this.http.get(this.url, options)
+		return this.http.get(url, {headers: this.headers})
 		.map((response: Response) => response.json());
 	}    
 
@@ -38,6 +39,7 @@ export class WidgetSettingService {
 		let body = data;
 
 		var url = this.url + '/' + body._id;
+		delete body['_id'];
 
 		return this.http.put(url, JSON.stringify(body), {headers: this.headers})
 		.map((response: Response) => response.json());

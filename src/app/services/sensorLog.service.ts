@@ -1,5 +1,6 @@
 import { Injectable }    from '@angular/core';
 import { Headers, Http, Response, RequestOptions, URLSearchParams} from '@angular/http';
+import { Config } from './env.config';
 
 import 'rxjs/add/operator/map';
 
@@ -7,7 +8,7 @@ import 'rxjs/add/operator/map';
 export class SensorLogService {
 
 	private headers = new Headers({'Content-Type': 'application/json'});
-	private endpoint = 'http://192.168.43.226:3000/v1/api/';
+	private endpoint = Config;
 	private url = this.endpoint + 'sensor-log';
 	private options = new RequestOptions({ headers: this.headers});
 

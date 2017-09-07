@@ -4,6 +4,8 @@ import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorStreamService } from './sensorStream.service';
 import { WidgetService } from '../../services/widget.service';
 import { WidgetSettingService } from '../../services/widgetSetting.service';
+import { WidgetModel } from './widget-model';
+import { SensorDirectory } from './sensor-directory-model';
 
 @Component({
     selector: 'app-charts',
@@ -12,6 +14,7 @@ import { WidgetSettingService } from '../../services/widgetSetting.service';
     animations: [routerTransition()],
     providers: [SensorStreamService, WidgetService, WidgetSettingService]
 })
+
 export class DashComponent implements OnInit {
 
     public messages = [];
@@ -27,7 +30,11 @@ export class DashComponent implements OnInit {
 
     private pitchTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
     private rollTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
+    private currentWidgetId:string;
+    private currentWidgeSettingtId:string;
+    private widgetSensorDirectory:SensorDirectory;
 
+    public currentWidgetSetting:any;
     public newWidget:any = {
         sensorId: '',
         dashboardId: '0',
@@ -42,7 +49,9 @@ export class DashComponent implements OnInit {
         pitchMin: -90,
         pitchMax: 90,
         isDegrees: true,
-    }    
+    }
+
+    public sensorWidgets:Array<WidgetModel> = [];    
 
     private intervalProcess:any = {};
 
@@ -102,41 +111,17 @@ export class DashComponent implements OnInit {
     public lineChartLegend: boolean = true;
     public lineChartType: string = 'line';
 
-    public testData = [
-        {
-            id: '1',
-            name: 'Sensor A',
-            pitchChart: [
-                { data: [-0.5, 0.4, -0.3, 0.2, -0.1, 0, 0.4, -0.3, 0.2, 0.1], label: 'Pitch', fill:false}
-            ],
-            rollChart: [
-                { data: [0.5, -0.4, 0.3, -0.2, 0.1, 0, -0.4, 0.2, -0.1, 0.3], label: 'Roll', fill:false}
-            ]            
-        },
-        {
-            id: '2',
-            name: 'Sensor B',
-            pitchChart: [
-                { data: [-0.5, 0.4, -0.3, 0.2, -0.1, 0, 0.4, -0.3, 0.2, 0.1], label: 'Pitch', fill:false}
-            ],
-            rollChart: [
-                { data: [0.5, -0.4, 0.3, -0.2, 0.1, 0, -0.4, 0.2, -0.1, 0.3], label: 'Roll', fill:false}
-            ]   
-        }        
-    ];
-
-    // events
-    public chartClicked(e: any): void {
-        // console.log(e);
-    }
-
-    public chartHovered(e: any): void {
-        // console.log(e);
-    }
-
     public closeResult: string;
 
-    public open(content) {
+    public open(content, id) {
+        this.currentWidgetId = id;
+
+        this._widgetSettingService.getByWidgetId(id)
+        .subscribe(data => {
+            this.currentWidgeSettingtId = data.data._id;
+            this.currentWidgetSetting = data.data;
+        }); 
+
         this.modalService.open(content).result.then((result) => {
             this.closeResult = `Closed with: ${result}`;
         }, (reason) => {
@@ -164,17 +149,35 @@ export class DashComponent implements OnInit {
 	private fetchWidgets():void{
         this._widgetService.getAll()
         .subscribe(data => {
-            
+            let widgets = data.data;
+            let output = [];
+            var tmp = {};         
+
+            widgets.forEach((widget, idx) => {
+                widget.pitchChart = [
+                    { data: [-0.1, 0.1, -0.1, 0.1, -0.1, 0, 0.1, -0.1, 0.1, 0.1], label: 'Pitch', fill:false}
+                ];
+                widget.rollChart = [
+                    { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
+                ];
+                output.push(widget);
+                tmp[widget.sensorId] = 0;
+            });
+
+            this.widgetSensorDirectory = tmp;
+            this.sensorWidgets = output;
+            this.iniateWebSockets();
         });
     }  
 
     public createWidget():void{
-        console.log(this.newWidget);
 		this._widgetService.create(this.newWidget)
 		.subscribe(data => {
+            this.newWidgetSetting.widgetId = data.data._id;
             this._widgetSettingService.create(this.newWidgetSetting)
             .subscribe(data => {
                 this.fetchWidgets();
+                this.clearAddSensorWidgetForm()
             });            
 		});          
     }
@@ -183,33 +186,48 @@ export class DashComponent implements OnInit {
         this._widgetSettingService.getByWidgetId('123')
         .subscribe(data => {
             this.fetchWidgets();
-        });        
+        });
     }  
 
     public updateWidgetSetting():void{
-        this._widgetSettingService.update({})
+        this._widgetSettingService.update(this.currentWidgetSetting)
         .subscribe(data => {
             this.fetchWidgets();
         });        
     }    
 
     public deleteWidget():void{
-        var widgetId = '0';
+        var widgetId = this.currentWidgetId;
         var widgetSettingId = '0';
 
 		this._widgetService.delete(widgetId)
 		.subscribe(data => {
-            this._widgetSettingService.delete(widgetSettingId)
-            .subscribe(data => {
-                this.fetchWidgets();
-            });            
+            this.fetchWidgets();
+            // this._widgetSettingService.delete(widgetSettingId)
+            // .subscribe(data => {
+            //     this.fetchWidgets();
+            // });            
 		});    
     }
 
-    ngOnInit() {
+    private clearAddSensorWidgetForm():void{
+        this.newWidget =  {
+            sensorId: '',
+            dashboardId: '0',
+            type: 'motion-sensor',
+            description: 'default'
+        }        
+    }
+
+    private iniateWebSockets():void{
+        if(this.connection){
+            this.connection.unsubscribe();
+        } 
+
         this.connection = this._sensorStreamService.getMessages().subscribe(message => {
             var tmp = message.toString();
             var buffer = tmp.split(',');
+            var sensorId = buffer[0].toString();
             var roll = parseFloat(buffer[3]);
             var pitch = parseFloat(buffer[2]);
 
@@ -219,14 +237,18 @@ export class DashComponent implements OnInit {
             this.rollTmpData.unshift(this.radiansToDegrees(roll));
             this.rollTmpData.pop();            
 
-            const pitchClone = JSON.parse(JSON.stringify(this.testData[0].pitchChart));
+            const pitchClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart));
             pitchClone[0].data = this.pitchTmpData;
-            this.testData[0].pitchChart = pitchClone;
+            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart = pitchClone;
             
-            const rollClone = JSON.parse(JSON.stringify(this.testData[0].rollChart));
+            const rollClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart));
             rollClone[0].data = this.rollTmpData;
-            this.testData[0].rollChart = rollClone;             
-        })        
+            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart = rollClone;             
+        });        
+    }    
+
+    ngOnInit() {
+        this.fetchWidgets();       
     }
 
 	ngOnDestroy() {

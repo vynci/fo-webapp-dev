@@ -4,7 +4,7 @@
             <button type="button" class="btn btn-primary" (click)="open(content)"><i class="fa fa-plus"></i> Add Widget</button>            
         </div>
     </div>
-    <div class="row" *ngFor="let sensor of testData">
+    <div class="row" *ngFor="let sensor of sensorWidgets">
         <div class="col col-sm-12">
             <div class="card mb-3">
                 <div class="card-header">
@@ -13,8 +13,8 @@
                             {{sensor.name}}
                         </div>
                         <div class="col col-sm-6" style="text-align:right;">
-                            <button type="button" class="btn btn-sm btn-outline-info" (click)="open(editWidgetContent)"><i class="fa fa-cog"></i></button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" (click)="open(deleteWidgetContent)"><i class="fa fa-trash"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-info" (click)="open(editWidgetContent, sensor._id)"><i class="fa fa-cog"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" (click)="open(deleteWidgetContent, sensor._id)"><i class="fa fa-trash"></i></button>
                         </div>
                     </div>                    
                 </div>
@@ -74,18 +74,18 @@
         </button>
     </div>
     <div class="modal-body">
-        <h5>Treshold Values</h5>
+        <h5>Treshold Indicator Values</h5>
         <br>
         <div class="row">
             <div class="col col-sm-6">
                 <form role="form">
                     <fieldset class="form-group">
                         <label>Roll (min)</label>
-                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentWidgetSetting.rollMin" name="rollMin" max="180" min="-180" class="form-control" placeholder="0">
                     </fieldset>
                     <fieldset class="form-group">
                         <label>Pitch (min)</label>
-                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentWidgetSetting.pitchMin" name="pitchMin" max="180" min="-180" class="form-control" placeholder="0">
                     </fieldset>                            
                 </form> 
             </div>  
@@ -93,11 +93,11 @@
                 <form role="form">
                     <fieldset class="form-group">
                         <label>Roll (max)</label>
-                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentWidgetSetting.rollMax" name="rollMax" max="180" min="-180" class="form-control" placeholder="0">
                     </fieldset>
                     <fieldset class="form-group">
                         <label>Pitch (max)</label>
-                        <input type="number" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentWidgetSetting.pitchMax" name="pitchMax" max="180" min="-180" class="form-control" placeholder="0">
                     </fieldset>                            
                 </form> 
             </div>  
@@ -105,8 +105,8 @@
                                
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-primary" (click)="c('Close click')">Save</button>
-        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateWidgetSetting(); c('Close click')">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="updateWidgetSetting(); c('Close click')">Cancel</button>
     </div>
 </ng-template> 
 
