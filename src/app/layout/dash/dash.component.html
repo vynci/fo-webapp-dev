@@ -4,6 +4,11 @@
             <button type="button" class="btn btn-primary" (click)="open(content)"><i class="fa fa-plus"></i> Add Widget</button>            
         </div>
     </div>
+    <div *ngIf="sensorWidgets.length == 0" class="row">
+        <div class="col col-sm-12" style="padding-top:150px;">
+            <p style="text-align:center;">You currently have no widgets. Click <b>Add Widget</b> button to create one.</p>
+        </div>
+    </div>
     <div class="row" *ngFor="let sensor of sensorWidgets">
         <div class="col col-sm-12">
             <div class="card mb-3">

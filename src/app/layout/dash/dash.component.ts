@@ -198,15 +198,15 @@ export class DashComponent implements OnInit {
 
     public deleteWidget():void{
         var widgetId = this.currentWidgetId;
-        var widgetSettingId = '0';
+        var widgetSettingId = this.currentWidgeSettingtId;
 
 		this._widgetService.delete(widgetId)
 		.subscribe(data => {
             this.fetchWidgets();
-            // this._widgetSettingService.delete(widgetSettingId)
-            // .subscribe(data => {
-            //     this.fetchWidgets();
-            // });            
+            this._widgetSettingService.delete(widgetSettingId)
+            .subscribe(data => {
+                this.fetchWidgets();
+            });            
 		});    
     }
 

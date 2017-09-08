@@ -49,6 +49,6 @@ export class WidgetSettingService {
 		var url = this.url + '/' + id;
 
 		return this.http.delete(url, {headers: this.headers})
-		.map((response: Response) => response.json());
+		.map((response: Response) => response);
 	}	
 }
