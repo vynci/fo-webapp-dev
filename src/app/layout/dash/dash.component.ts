@@ -161,7 +161,7 @@ export class DashComponent implements OnInit {
                     { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
                 ];
                 output.push(widget);
-                tmp[widget.sensorId] = 0;
+                tmp[widget.sensorId] = idx;
             });
 
             this.widgetSensorDirectory = tmp;
@@ -230,12 +230,13 @@ export class DashComponent implements OnInit {
             var sensorId = buffer[0].toString();
             var roll = parseFloat(buffer[3]);
             var pitch = parseFloat(buffer[2]);
-
             this.pitchTmpData.unshift(this.radiansToDegrees(pitch));
             this.pitchTmpData.pop();
 
             this.rollTmpData.unshift(this.radiansToDegrees(roll));
             this.rollTmpData.pop();            
+            console.log(this.widgetSensorDirectory);
+            console.log(this.widgetSensorDirectory[sensorId]);
 
             const pitchClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart));
             pitchClone[0].data = this.pitchTmpData;
