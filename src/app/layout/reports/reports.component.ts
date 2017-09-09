@@ -4,6 +4,7 @@ import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorLogService } from '../../services/sensorLog.service';
 import { WidgetService } from '../../services/widget.service';
 import { JSONToCSV } from '../../services/JSONToCSV.service';
+import { WidgetModel } from './widget-model';
 
 @Component({
     selector: 'app-tables',
@@ -27,6 +28,7 @@ export class ReportsComponent implements OnInit {
     public closeResult: string;    
 
     public sensorLogs:Array<Object> = [];
+    public widgets:Array<WidgetModel> = [];
     private dateNow = new Date();
 
     public dateFilter:any = {
@@ -38,7 +40,8 @@ export class ReportsComponent implements OnInit {
     public tableRowLimit:number = 10;
     public collectionSize:number;
 
-    public currentSensorId:string = "1001";
+    public currentSensorId:string = 'null';
+    public currentWidgetName:string = 'null';
 
     public dateFilterType:string;
 
@@ -130,7 +133,14 @@ export class ReportsComponent implements OnInit {
             return  `with: ${reason}`;
         }
     }
-    
+
+	private fetchWidgets():void{
+        this._widgetService.getAll()
+        .subscribe(data => {
+            this.widgets = data.data;
+        });
+    }  
+
 	private fetchLogs():void{
         this.globalFilter = {
             createdDate : {
@@ -149,7 +159,13 @@ export class ReportsComponent implements OnInit {
         this._sensorLogService.count(this.globalFilter)
         .subscribe(data => {
             this.collectionSize = data.data;
-        });        
+        });
+
+        this.widgets.forEach((widget) => {
+            if(widget.sensorId === this.currentSensorId){
+                this.currentWidgetName = widget.name
+            }
+        });    
     }
     
     private formatAMPM(date) {
@@ -176,5 +192,6 @@ export class ReportsComponent implements OnInit {
 
     ngOnInit() { 
         this.initiateDateToFilter();
+        this.fetchWidgets();
     }
 }

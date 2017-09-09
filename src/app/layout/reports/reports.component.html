@@ -23,24 +23,23 @@
     </div>
     <div class="col-sm-3">
         <div class="form-group">
-            <select class="form-control">
-                <option value="" selected disabled>Choose Sensor</option>
-                <option>Sensor A</option>
-                <option>Sensor B</option>
+            <select class="form-control" [(ngModel)]="currentSensorId">
+                <option value="null" selected disabled>Choose Sensor</option>
+                <option value="{{widget.sensorId}}" *ngFor="let widget of widgets">{{widget.name}} - {{widget.sensorId}}</option>
             </select>
         </div>
     </div>        
     <div class="col-sm-3">
         <div class="form-group">
-            <button type="button" class="btn btn-success btn-block" (click)="generateReport()">Generate</button>
+            <button type="button" [disabled]="currentSensorId === 'null'" class="btn btn-success btn-block" (click)="generateReport()">Generate</button>
         </div>             
     </div>        
 </div>    
-<br>
 
+<br>
 <div *ngIf="!isReportGenerated" class="row" style="margin-top: 250px;">
     <div class="col col-lg-12">
-        <p style="text-align:center;">Empty Report. Click <b>Generate</b> button to create one.</p>
+        <p style="text-align:center;">Empty Report. <b>Choose</b> a sensor, and click <b>Generate</b> button to create one.</p>
     </div>
 </div>
 
@@ -50,15 +49,28 @@
             <div class="card-header">
                 <div class="row">
                     <div class="col col-sm-6">
-                        Report for Sensor A
+                        Report for {{currentWidgetName}}
                     </div>
                     <div class="col col-sm-6" style="text-align:right;">
                         <!-- <button type="button" class="btn btn-sm btn-outline-danger">PDF</button> -->
-                        <button type="button" (click)="downloadCSV()" class="btn btn-sm btn-outline-warning">CSV</button>
+                        <button type="button" [disabled]="sensorLogs == 0" (click)="downloadCSV()" class="btn btn-sm btn-outline-warning">CSV</button>
                     </div>
                 </div>                
             </div>
             <div class="card-block table-responsive">
+                <div *ngIf="sensorLogs != 0" class="row">
+                    <div class="col col-sm-9"></div>                    
+                    <div class="col col-sm-3">
+                        <label for=""><b>Rows per page</b></label>
+                        <select class="form-control" [(ngModel)]="tableRowLimit" (ngModelChange)="generateReport()">
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>        
+                    </div>
+                </div>                
                 <div>
                     <p *ngIf="sensorLogs == 0" style="text-align:center;">No Results Found. Please try again with other sensors or date range.</p>
                 </div>
