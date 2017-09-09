@@ -3,13 +3,14 @@ import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorLogService } from '../../services/sensorLog.service';
 import { WidgetService } from '../../services/widget.service';
+import { JSONToCSV } from '../../services/JSONToCSV.service';
 
 @Component({
     selector: 'app-tables',
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.scss'],
     animations: [routerTransition()],
-    providers: [SensorLogService,WidgetService]
+    providers: [SensorLogService,WidgetService,JSONToCSV]
 })
 export class ReportsComponent implements OnInit {
     public defaultPagination: number;
@@ -44,7 +45,8 @@ export class ReportsComponent implements OnInit {
     constructor(
         private modalService: NgbModal,
         private _sensorLogService: SensorLogService,
-        private _widgetService: WidgetService
+        private _widgetService: WidgetService,
+        private _jsonToCSVService : JSONToCSV
     ) {
         this.defaultPagination = 1;
         this.currentPage = 1;
@@ -101,12 +103,18 @@ export class ReportsComponent implements OnInit {
 
     public downloadCSV():void{
         console.log('download CSV!');
+
+        this._sensorLogService.get(this.globalFilter, 0, 25000)
+        .subscribe(data => {
+            console.log(data);
+            this._jsonToCSVService.Convert(data.data, 'report');
+        });        
     }
 
     public onPageChange(event:number):void{
         var skip = (event - 1) * this.tableRowLimit
 
-        this._sensorLogService.getAll(this.globalFilter, skip, this.tableRowLimit)
+        this._sensorLogService.get(this.globalFilter, skip, this.tableRowLimit)
         .subscribe(data => {
             this.sensorLogs = data.data;
             console.log(this.sensorLogs);
@@ -132,7 +140,7 @@ export class ReportsComponent implements OnInit {
             sensorId : this.currentSensorId
         }
 
-        this._sensorLogService.getAll(this.globalFilter, 0, this.tableRowLimit)
+        this._sensorLogService.get(this.globalFilter, 0, this.tableRowLimit)
         .subscribe(data => {
             this.currentPage = 1;
             this.sensorLogs = data.data;

@@ -34,7 +34,14 @@ export class DashComponent implements OnInit {
     private currentWidgeSettingtId:string;
     private widgetSensorDirectory:SensorDirectory;
 
-    public currentWidgetSetting:any;
+    public currentWidgetSetting:any = {
+        widgetId: '',
+        rollMin: -90,
+        rollMax: 90,
+        pitchMin: -90,
+        pitchMax: 90,
+        isDegrees: true        
+    };
     public newWidget:any = {
         sensorId: '',
         dashboardId: '0',

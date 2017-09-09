@@ -3,9 +3,9 @@ import { Observable } from 'rxjs/Observable';
 import * as io from 'socket.io-client';
 
 export class SensorStreamService {
-//   private url = 'http://172.20.10.10:4444';
-  // private url = 'http://192.168.1.5:4444';
-  private url = 'http://192.168.43.226:4444';
+  // private url = 'http://172.20.10.9:4444';
+  private url = 'http://192.168.1.9:4444';
+  // private url = 'http://192.168.43.226:4444';
   private socket;
   
   sendMessage(message){

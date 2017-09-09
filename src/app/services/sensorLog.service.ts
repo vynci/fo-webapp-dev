@@ -14,7 +14,7 @@ export class SensorLogService {
 
 	constructor(private http: Http) { }
 
-	getAll(data:any, skip:number, limit:number)
+	get(data:any, skip:number, limit:number)
 	{
 		let filter = JSON.stringify(data);
 		let search = new URLSearchParams('filter=' + filter);
@@ -25,6 +25,14 @@ export class SensorLogService {
 		return this.http.get(this.url, options)
 		.map((response: Response) => response.json());
 	}
+
+	getAll()
+	{
+		let options = new RequestOptions({ headers: this.headers});
+
+		return this.http.get(this.url, options)
+		.map((response: Response) => response.json());
+	}	
 
 	count(data:any)
 	{
