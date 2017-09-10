@@ -5,6 +5,7 @@ export class WidgetModel {
 	type: string;
     dashboardId: string;
     sensorId: string;
+    headingChart: any;    
     pitchChart: any;
-    rollChart: any;
+    rollChart: any;    
 }

@@ -30,6 +30,8 @@ export class DashComponent implements OnInit {
 
     private pitchTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
     private rollTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
+    private headingTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
+
     private currentWidgetId:string;
     private currentWidgeSettingtId:string;
     private widgetSensorDirectory:SensorDirectory;
@@ -167,6 +169,9 @@ export class DashComponent implements OnInit {
                 widget.rollChart = [
                     { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
                 ];
+                widget.headingChart = [
+                    { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
+                ];                
                 output.push(widget);
                 tmp[widget.sensorId] = idx;
             });
@@ -237,13 +242,16 @@ export class DashComponent implements OnInit {
             var sensorId = buffer[0].toString();
             var roll = parseFloat(buffer[3]);
             var pitch = parseFloat(buffer[2]);
+            var heading = parseFloat(buffer[1]);
+
             this.pitchTmpData.unshift(this.radiansToDegrees(pitch));
             this.pitchTmpData.pop();
 
             this.rollTmpData.unshift(this.radiansToDegrees(roll));
-            this.rollTmpData.pop();            
-            console.log(this.widgetSensorDirectory);
-            console.log(this.widgetSensorDirectory[sensorId]);
+            this.rollTmpData.pop();
+            
+            this.headingTmpData.unshift(this.radiansToDegrees(heading));
+            this.headingTmpData.pop();            
 
             const pitchClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart));
             pitchClone[0].data = this.pitchTmpData;
@@ -252,6 +260,10 @@ export class DashComponent implements OnInit {
             const rollClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart));
             rollClone[0].data = this.rollTmpData;
             this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart = rollClone;             
+
+            const headingClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].headingChart));
+            headingClone[0].data = this.headingTmpData;
+            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].headingChart = headingClone;               
         });        
     }    
 

@@ -35,7 +35,15 @@
                             </canvas>                                                         
                         </div>
                         <div class="col col-sm-6" style="text-align:center;">
-                            <img src="assets/images/3dtemp.png" style="width:75%;" class="user-avatar" />
+                            <geometry-cube texture="/assets/textures/crate.gif"
+                            [size]="200"
+                            [rotationSpeedX]="sensor.rollChart[0]?.data[0]"
+                            [rotationSpeedY]="sensor.headingChart[0]?.data[0]"
+                            [rotationSpeedZ]="sensor.pitchChart[0]?.data[0]"
+                            [cameraZ]="400"
+                            [fieldOfView]="70"
+                            [nearClipping]="1"
+                            [farClipping]="1000"></geometry-cube>
                         </div>                    
                     </div>                    
                 </div>

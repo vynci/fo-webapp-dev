@@ -6,6 +6,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { DashRoutingModule } from './dash-routing.module';
 import { DashComponent } from './dash.component';
 import { PageHeaderModule } from '../../shared';
+import { ThreeModelComponent } from '../3DModel/3DModel.component';
 
 import { FormsModule } from '@angular/forms';
 
@@ -18,6 +19,6 @@ import { FormsModule } from '@angular/forms';
         PageHeaderModule,
         FormsModule
     ],
-    declarations: [DashComponent]
+    declarations: [DashComponent, ThreeModelComponent]
 })
 export class DashModule { }
