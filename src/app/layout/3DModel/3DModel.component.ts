@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
 import * as THREE from 'three';
+import { OrbitControls } from '@avatsaev/three-orbitcontrols-ts';
 
 @Component({
   selector: 'geometry-cube',
@@ -88,10 +89,17 @@ export class ThreeModelComponent implements AfterViewInit {
     const ambient = new THREE.AmbientLight( 0x444444 );
     this.scene.add( ambient );
 
+    const size = 50;
+    const divisions = 50;
+    const gridHelper = new THREE.GridHelper( size, divisions );
+
     const directionalLight = new THREE.DirectionalLight( 0xffeedd );
     directionalLight.position.set( 0, 0, 1 ).normalize();
 
+    gridHelper.position.setY(-2.5);
+
     this.scene.add( directionalLight );
+    this.scene.add( gridHelper );
 
     const objectLoader = new THREE.ObjectLoader();
     const that = this;
@@ -121,6 +129,8 @@ export class ThreeModelComponent implements AfterViewInit {
 
     this.camera.position.set( 18, 18, 18 ); // all components equal
     this.camera.lookAt( this.scene.position ); // or the origin    
+
+    const controls = new OrbitControls(this.camera, this.canvasRef.nativeElement);
   }
 
   private getAspectRatio() {

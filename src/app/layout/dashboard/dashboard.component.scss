@@ -1,0 +1,44 @@
+.graph-height {
+    height: 250px;
+}
+
+.non-graph-height {
+    height: 385px;
+}
+
+.component-header {
+    height: 30px;
+    margin-bottom: 10px;
+    color: white;
+    text-align: center;
+    padding-top: 2px;
+    border-bottom: 1px solid #444;
+}
+
+.component-container {
+    border: 1px solid #444;
+    margin-bottom: 20px;
+}
+
+.component-console {
+    background: black;
+    height: 92%
+}
+
+.label-blue {
+    background: #3498db;
+}
+
+.label-green {
+    background: #2ecc71;
+}
+
+.label-orange {
+    background: #f0ad4e;
+}
+
+.label-gray {
+    height: 8% !important;
+    margin-bottom: 0px !important;
+    background: gray;
+}

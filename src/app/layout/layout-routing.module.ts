@@ -9,7 +9,8 @@ const routes: Routes = [
             { path: 'dashboard', loadChildren: './dash/dash.module#DashModule' },
             { path: 'reports', loadChildren: './reports/reports.module#ReportsModule' },
             { path: 'settings', loadChildren: './form/form.module#FormModule' },
-            { path: 'kiosk', loadChildren: './kiosk/kiosk.module#KioskModule' }
+            { path: 'kiosk', loadChildren: './kiosk/kiosk.module#KioskModule' },
+            { path: 'dashboard-v2', loadChildren: './dashboard/dashboard.module#DashboardModule' }
         ]
     }
 ];

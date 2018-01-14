@@ -71,3 +71,15 @@ $topnav-background-color: #222;
     background: $topnav-background-color !important;
     height: 55px;
 }
+
+.link-container {
+    margin-right: 50px !important;
+    padding: 5px 10px;
+}
+
+.link-selected {
+    background: white;
+    border-radius: 5px;
+    color: #222;
+    font-weight: bold;
+}

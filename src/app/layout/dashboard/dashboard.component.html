@@ -1,0 +1,54 @@
+<div>
+    <div class="row">
+        <div class="col col-sm-4">
+            <div class="component-container graph-height">
+                <div class="component-header label-green">Pitch: <strong>{{sensorWidget.pitchChart[0].data[0] || '0'}} °</strong></div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.pitchChart"  [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+            </div>
+            <div class="component-container graph-height">
+                <div class="component-header label-blue">Roll: {{sensorWidget.rollChart[0].data[0] || '0'}} °</div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.rollChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
+            </div>
+            <div class="component-container graph-height">
+                <div class="component-header label-orange">Heading: {{sensorWidget.headingChart[0].data[0] || '0'}} °</div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.headingChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+            </div>
+        </div>
+        <div class="col col-sm-4">
+            <div class="component-container graph-height">
+                <div class="component-header label-green">Pitch Acceleration: <strong>{{sensorWidget.pitchAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.pitchAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+            </div>
+            <div class="component-container graph-height">
+                <div class="component-header label-blue">Roll Acceleration <strong>{{sensorWidget.rollAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.rollAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
+            </div>
+            <div class="component-container graph-height">
+                <div class="component-header label-orange">Heading Acceleration <strong>{{sensorWidget.headingAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.headingAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+            </div>        
+        </div>
+        <div class="col col-sm-4">
+            <div class="component-container non-graph-height">
+                <div class="component-header label-gray">3D Model</div>
+                <div class="component-console">
+                    <geometry-cube texture="/assets/textures/crate.gif"
+                    [size]="200"
+                    [rotationSpeedX]="sensorReadings.roll"
+                    [rotationSpeedY]="sensorReadings.heading"
+                    [rotationSpeedZ]="sensorReadings.pitch"
+                    [cameraZ]="400"
+                    [fieldOfView]="70"
+                    [nearClipping]="1"
+                    [farClipping]="1000"></geometry-cube>                    
+                </div>
+            </div>
+            <div class="component-container non-graph-height">
+                <div class="component-header label-gray">Console</div>
+                <div class="component-console"></div>    
+            </div>            
+        </div>
+    </div>
+    <div class="row"></div>
+    <div class="row"></div>
+</div>
