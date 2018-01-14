@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorLogService } from '../../services/sensorLog.service';
+import { HelperService } from '../../services/helper.service';
 import { WidgetService } from '../../services/widget.service';
 import { JSONToCSV } from '../../services/JSONToCSV.service';
 import { WidgetModel } from './widget-model';
@@ -11,7 +12,7 @@ import { WidgetModel } from './widget-model';
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.scss'],
     animations: [routerTransition()],
-    providers: [SensorLogService,WidgetService,JSONToCSV]
+    providers: [SensorLogService,WidgetService,JSONToCSV,HelperService]
 })
 export class ReportsComponent implements OnInit {
     public defaultPagination: number;
@@ -19,6 +20,10 @@ export class ReportsComponent implements OnInit {
     public paginationSize: number;
     public disabledPagination: number;
     public isDisabled: boolean;
+    public isLoading:boolean = false;
+    public isShowGraph:boolean = false;
+    public showGraphButtonLabel:string = 'Show Graph';
+    public csvButtonLabel:string = 'CSV';
 
     public timeModel = {hour: 13, minute: 30};
     public dateModel:any;
@@ -49,6 +54,7 @@ export class ReportsComponent implements OnInit {
         private modalService: NgbModal,
         private _sensorLogService: SensorLogService,
         private _widgetService: WidgetService,
+        private _helperService: HelperService,
         private _jsonToCSVService : JSONToCSV
     ) {
         this.defaultPagination = 1;
@@ -56,7 +62,63 @@ export class ReportsComponent implements OnInit {
         this.paginationSize = 1;
         this.disabledPagination = 1;
         this.isDisabled = true;        
-     }
+    }
+
+    public lineChartLabels: Array<any>;
+
+    public lineChartColor: Array<any> = [
+        { // blue
+            backgroundColor: '#3498db',
+            borderColor: '#3498db',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: 'transparent',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(148,159,177,0.8)'
+        },
+        { // green
+            backgroundColor: '#2ecc71',
+            borderColor: '#2ecc71',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: 'transparent',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(148,159,177,0.8)'
+        }      
+
+    ]; 
+
+    public lineChartLegend: boolean = true;
+    public lineChartType: string = 'line';
+    
+    public chartData = [
+        { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false},
+        { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Pitch', fill:false}
+        
+    ]    
+
+    public lineChartOptions: any = {
+        responsive: true,
+        animation: {
+            duration: 100
+        },
+        legend: {
+            display: false
+        },        
+        scales: {
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Degrees'
+                }                
+            }],
+            xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Date - Time'
+                }                
+            }]            
+
+        }        
+    };
 
     public generateReport(): void {
         this.isReportGenerated = true;
@@ -98,6 +160,10 @@ export class ReportsComponent implements OnInit {
     public formatDate(date:any):string{
         if(typeof date !== 'object' ){
             date = new Date(date);
+            var d = new Date();
+            var n = d.getTimezoneOffset();
+            n = n / 60
+            date.setHours(date.getHours() + n)
         }
 
         var date:any = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + this.formatAMPM(date);
@@ -105,14 +171,38 @@ export class ReportsComponent implements OnInit {
     }   
 
     public downloadCSV():void{
-        console.log('download CSV!');
-
+        this.csvButtonLabel = 'Loading...';
         this._sensorLogService.get(this.globalFilter, 0, 25000)
         .subscribe(data => {
-            console.log(data);
-            this._jsonToCSVService.Convert(data.data, 'report');
+            var now = new Date();
+            var filename = now.toISOString();
+            this.csvButtonLabel = 'CSV';
+            this._jsonToCSVService.Convert(data.data, 'report-' + filename + '.csv');
         });        
     }
+
+    public hideGraph():void{
+        this.isShowGraph = false;      
+    }  
+
+    public showGraph():void{
+        this.isShowGraph = false;
+        this.showGraphButtonLabel = 'Loading...';
+        this._sensorLogService.get(this.globalFilter, 0, 10000)
+        .subscribe(data => {
+            console.log(data);
+            this.isShowGraph = true;
+            this.showGraphButtonLabel = 'Show Graph';
+            this.lineChartLabels = [];
+            this.chartData[0].data = [];
+            this.chartData[1].data = [];
+            data.data.forEach((obj) => {
+                this.chartData[0].data.push(obj.roll);
+                this.chartData[1].data.push(obj.pitch);
+                this.lineChartLabels.push(this.formatDate(obj.createdDate));                            
+            });
+        });        
+    }    
 
     public onPageChange(event:number):void{
         var skip = (event - 1) * this.tableRowLimit
@@ -120,7 +210,6 @@ export class ReportsComponent implements OnInit {
         this._sensorLogService.get(this.globalFilter, skip, this.tableRowLimit)
         .subscribe(data => {
             this.sensorLogs = data.data;
-            console.log(this.sensorLogs);
         });        
     }
 
@@ -142,6 +231,9 @@ export class ReportsComponent implements OnInit {
     }  
 
 	private fetchLogs():void{
+        this.isLoading = true;
+        this.isShowGraph = false;
+
         this.globalFilter = {
             createdDate : {
                 $lte : this.dateFilter.to,
@@ -159,6 +251,7 @@ export class ReportsComponent implements OnInit {
         this._sensorLogService.count(this.globalFilter)
         .subscribe(data => {
             this.collectionSize = data.data;
+            this.isLoading = false;
         });
 
         this.widgets.forEach((widget) => {
@@ -188,6 +281,21 @@ export class ReportsComponent implements OnInit {
         this.dateNow.setHours(0);
         this.dateNow.setMinutes(0);
         this.dateFilter.from = this.dateNow;
+    }
+
+    private syncTime(){
+        var data = new Date();
+        var timeData;
+        timeData = data.toString();
+        data = timeData.split(' ');
+        timeData = data[0] + ' ' + data[1] + ' ' + data[2] + ' ' + data[4] + ' UTC ' + data[3];        
+
+        console.log(timeData);
+
+        this._helperService.setTime(timeData)
+        .subscribe(data => {
+            console.log(data);
+        });        
     }
 
     ngOnInit() { 

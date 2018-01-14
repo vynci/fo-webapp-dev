@@ -1,6 +1,24 @@
 <div>
     <div class="row">
-        <div class="col col-sm-12 add-widget-container">
+        <div class="col col-sm-3 add-widget-container" style="text-align:left;">
+            <div class="row">
+                <div class="col col-sm-2" style="padding-top: 5px;">
+                    <span>Period:</span>
+                </div>
+                <div class="col col-sm-10">
+                    <select class="form-control" [ngModel]="selectedInterval" (ngModelChange)="onIntervalSelect($event)" name="sel2">
+                        <option [value]="1000">1 Second</option>                    
+                        <option [value]="60000">1 Minute</option>
+                        <option [value]="120000">2 Minutes</option>
+                        <option [value]="180000">3 Minutes</option>
+                        <option [value]="240000">4 Minutes</option>
+                        <option [value]="300000">5 Minutes</option>
+                    </select> 
+                </div>                
+            </div>
+        </div>        
+        <div class="col col-sm-3 add-widget-container"></div>
+        <div class="col col-sm-6 add-widget-container">
             <button type="button" class="btn btn-primary" (click)="open(content)"><i class="fa fa-plus"></i> Add Widget</button>            
         </div>
     </div>
@@ -15,9 +33,15 @@
                 <div class="card-header">
                     <div class="row">
                         <div class="col col-sm-6">
-                            {{sensor.name}}
+                            {{sensor.name}} ({{sensor.sensorId}}) 
+                            <span>
+                                <i [ngClass]="getBatteryIndicator(sensor.battery)" [style.color]="getBatteryStyle(sensor.battery)" style="margin-left:10px;"> 
+                                    {{sensor.battery || 0}}%
+                                </i>
+                            </span>
                         </div>
                         <div class="col col-sm-6" style="text-align:right;">
+                            <button type="button" class="btn btn-sm btn-outline-warning" (click)="open(rebootWidgetContent, sensor._id)"><i class="fa fa-power-off"></i></button>                            
                             <button type="button" class="btn btn-sm btn-outline-info" (click)="open(editWidgetContent, sensor._id)"><i class="fa fa-cog"></i></button>
                             <button type="button" class="btn btn-sm btn-outline-danger" (click)="open(deleteWidgetContent, sensor._id)"><i class="fa fa-trash"></i></button>
                         </div>
@@ -26,13 +50,44 @@
                 <div class="card-block">
                     <div class="row">
                         <div class="col col-sm-6">
-                            <div class="label-graph"><b>Roll</b>: {{sensor.rollChart[0].data[0] || 'n/a'}}°</div>
+                            <div class="label-graph">
+                                <div class="row">
+                                    <div class="col col-sm-6" style="text-align:right">
+                                        <b>Roll</b>: <span [style.color]="getStyle(sensor, 'roll')">{{sensor.rollChart[0].data[0] || '0'}}°</span>
+                                    </div>
+                                    <div class="col col-sm-6" style="text-align:left">
+                                        <b>Acceleration</b>: <span>{{calculateAcceleration(sensor.rollChart[0].data[0], sensor.rollChart[0].data[9])}}°/s<sup>2</sup></span>
+                                    </div>
+                                </div>
+                            </div>
                             <canvas baseChart height="90" [datasets]="sensor.rollChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
                             </canvas>
                             <br>
-                            <div class="label-graph"><b>Pitch</b>: {{sensor.pitchChart[0].data[0] || 'n/a'}}°</div>
+                            <div class="label-graph">
+                                <div class="row">
+                                    <div class="col col-sm-6" style="text-align:right">
+                                        <b>Pitch</b>: <span [style.color]="getStyle(sensor, 'pitch')">{{sensor.pitchChart[0].data[0] || '0'}}°</span>
+                                    </div>
+                                    <div class="col col-sm-6" style="text-align:left">
+                                        <b>Acceleration</b>: <span>{{calculateAcceleration(sensor.pitchChart[0].data[0], sensor.pitchChart[0].data[9])}}°/s<sup>2</sup></span>
+                                    </div>
+                                </div>                            
+                            </div>
                             <canvas baseChart height="90" [datasets]="sensor.pitchChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
-                            </canvas>                                                         
+                            </canvas>
+                            <br>
+                            <div class="label-graph">
+                                <div class="row">
+                                    <div class="col col-sm-6" style="text-align:right">
+                                        <b>Heading</b>: <span [style.color]="getStyle(sensor, 'heading')">{{sensor.headingChart[0].data[0] || '0'}}°</span>
+                                    </div>
+                                    <div class="col col-sm-6" style="text-align:left">
+                                        <b>Acceleration</b>: <span>{{calculateAcceleration(sensor.headingChart[0].data[0], sensor.headingChart[0].data[9])}}°/s<sup>2</sup></span>
+                                    </div>
+                                </div>                                 
+                            </div>
+                            <canvas baseChart height="90" [datasets]="sensor.headingChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)">
+                            </canvas>                                                                                      
                         </div>
                         <div class="col col-sm-6" style="text-align:center;">
                             <geometry-cube texture="/assets/textures/crate.gif"
@@ -135,6 +190,22 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-danger" (click)="deleteWidget(); c('Close click')">Delete</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template>
+
+<ng-template #rebootWidgetContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Reboot Module</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <p>Do you want to continue?</p>                               
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-warning" (click)="systemExecute('reboot'); c('Close click')">Reboot</button>
         <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
     </div>
 </ng-template>

@@ -19,6 +19,8 @@ export class ThreeModelComponent implements AfterViewInit {
 
   private cube: THREE.Mesh;
 
+  private boat: any;
+
   private renderer: THREE.WebGLRenderer;
 
   private scene: THREE.Scene;
@@ -41,11 +43,13 @@ export class ThreeModelComponent implements AfterViewInit {
   @Input()
   public texture: string = '/assets/textures/crate.gif';
 
+  @Input()
+  public jsonFile: string = '/assets/patrol-boat.json';
 
 
   /* STAGE PROPERTIES */
   @Input()
-  public cameraZ: number = 400;
+  public cameraZ: number = 1;
 
   @Input()
   public fieldOfView: number = 70;
@@ -69,23 +73,34 @@ export class ThreeModelComponent implements AfterViewInit {
    * Animate the cube
    */
   private animateCube() {
-    this.cube.rotation.x = this.rotationSpeedX * (Math.PI / 180);
-    this.cube.rotation.y = this.rotationSpeedY * (Math.PI / 180) * -1;
-    this.cube.rotation.z = this.rotationSpeedZ * (Math.PI / 180);
+    if(this.boat){
+    this.boat.rotation.x = this.rotationSpeedX * (Math.PI / 180);
+    this.boat.rotation.y = this.rotationSpeedY * (Math.PI / 180);
+    this.boat.rotation.z = this.rotationSpeedZ * (Math.PI / 180);
+    }
+
   }
 
   /**
    * Create the cube
    */
   private createCube() {
-    let texture = new THREE.TextureLoader().load(this.texture);
-    let material = new THREE.MeshBasicMaterial({ map: texture });
-    
-    let geometry = new THREE.BoxBufferGeometry(this.size, this.size, this.size);
-    this.cube = new THREE.Mesh(geometry, material);
+    const ambient = new THREE.AmbientLight( 0x444444 );
+    this.scene.add( ambient );
 
-    // Add cube to scene
-    this.scene.add(this.cube);
+    const directionalLight = new THREE.DirectionalLight( 0xffeedd );
+    directionalLight.position.set( 0, 0, 1 ).normalize();
+
+    this.scene.add( directionalLight );
+
+    const objectLoader = new THREE.ObjectLoader();
+    const that = this;
+
+    objectLoader.load(this.jsonFile,
+      (object) => {
+        this.boat = object
+        this.scene.add( this.boat );
+    });
   }
 
   /**
@@ -103,7 +118,9 @@ export class ThreeModelComponent implements AfterViewInit {
       this.nearClippingPane,
       this.farClippingPane
     );
-    this.camera.position.z = this.cameraZ;
+
+    this.camera.position.set( 18, 18, 18 ); // all components equal
+    this.camera.lookAt( this.scene.position ); // or the origin    
   }
 
   private getAspectRatio() {

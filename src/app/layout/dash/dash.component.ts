@@ -3,6 +3,7 @@ import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { SensorStreamService } from './sensorStream.service';
 import { WidgetService } from '../../services/widget.service';
+import { HelperService } from '../../services/helper.service';
 import { WidgetSettingService } from '../../services/widgetSetting.service';
 import { WidgetModel } from './widget-model';
 import { SensorDirectory } from './sensor-directory-model';
@@ -12,7 +13,7 @@ import { SensorDirectory } from './sensor-directory-model';
     templateUrl: './dash.component.html',
     styleUrls: ['./dash.component.scss'],
     animations: [routerTransition()],
-    providers: [SensorStreamService, WidgetService, WidgetSettingService]
+    providers: [SensorStreamService, WidgetService, WidgetSettingService, HelperService]
 })
 
 export class DashComponent implements OnInit {
@@ -25,6 +26,7 @@ export class DashComponent implements OnInit {
         private modalService: NgbModal,
         private _sensorStreamService: SensorStreamService,
         private _widgetService: WidgetService,
+        private _helperService: HelperService,
         private _widgetSettingService: WidgetSettingService
     ){}
 
@@ -32,9 +34,14 @@ export class DashComponent implements OnInit {
     private rollTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
     private headingTmpData:Array<number> = [0,0,0,0,0,0,0,0,0,0];
 
+    private prevBatteryResult:any;
+
     private currentWidgetId:string;
     private currentWidgeSettingtId:string;
     private widgetSensorDirectory:SensorDirectory;
+
+    public yLabelPlaceholderLimit:number = 60000;
+    public selectedInterval:any = this.yLabelPlaceholderLimit;
 
     public currentWidgetSetting:any = {
         widgetId: '',
@@ -66,6 +73,7 @@ export class DashComponent implements OnInit {
 
     public lineChartLabels: Array<any> = ['0', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
 
+
     public lineChartOptions: any = {
         responsive: true,
         animation: {
@@ -77,8 +85,8 @@ export class DashComponent implements OnInit {
         scales: {
             yAxes: [{
                 ticks: {
-                    suggestedMin: -90,
-                    suggestedMax: 90
+                    suggestedMin: -10,
+                    suggestedMax: 10
                 },
                 scaleLabel: {
                     display: true,
@@ -90,8 +98,7 @@ export class DashComponent implements OnInit {
                     display: true,
                     labelString: 'Time (ms)'
                 }                
-            }]            
-
+            }]
         }        
     };
 
@@ -99,8 +106,8 @@ export class DashComponent implements OnInit {
         { // green
             backgroundColor: '#2ecc71',
             borderColor: '#2ecc71',
-            pointBackgroundColor: 'gray',
-            pointBorderColor: 'gray',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: 'transparent',
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: 'rgba(148,159,177,0.8)'
         }
@@ -110,8 +117,19 @@ export class DashComponent implements OnInit {
         { // blue
             backgroundColor: '#3498db',
             borderColor: '#3498db',
-            pointBackgroundColor: 'gray',
-            pointBorderColor: 'gray',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: 'transparent',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(148,159,177,0.8)'
+        }
+    ];   
+    
+    public headingChartColor: Array<any> = [
+        { // blue
+            backgroundColor: '#f0ad4e',
+            borderColor: '#f0ad4e',
+            pointBackgroundColor: 'transparent',
+            pointBorderColor: 'transparent',
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: 'rgba(148,159,177,0.8)'
         }
@@ -136,6 +154,22 @@ export class DashComponent implements OnInit {
         }, (reason) => {
             this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
         });
+    }
+
+    private generateYLabel(limit:number, isLabel:boolean):any{
+        var x = [];
+
+        for(var i=0;i < limit; i++){
+            if((i % 100) === 0)
+            {
+                if(isLabel){
+                    x.push(i);    
+                }else{
+                    x.push(0);
+                }
+            }
+        }
+        return x;
     }
 
     private getDismissReason(reason: any): string {
@@ -163,24 +197,45 @@ export class DashComponent implements OnInit {
             var tmp = {};         
 
             widgets.forEach((widget, idx) => {
-                widget.pitchChart = [
-                    { data: [-0.1, 0.1, -0.1, 0.1, -0.1, 0, 0.1, -0.1, 0.1, 0.1], label: 'Pitch', fill:false}
-                ];
-                widget.rollChart = [
-                    { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
-                ];
-                widget.headingChart = [
-                    { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
-                ];                
-                output.push(widget);
-                tmp[widget.sensorId] = idx;
+                this._widgetSettingService.getByWidgetId(widget._id)
+                .subscribe(widgetSetting => {
+                    widget.pitchChart = [
+                        { data: [-0.1, 0.1, -0.1, 0.1, -0.1, 0, 0.1, -0.1, 0.1, 0.1], label: 'Pitch', fill:false}
+                    ];
+                    widget.rollChart = [
+                        { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
+                    ];
+                    widget.headingChart = [
+                        { data: [0.1, -0.1, 0.1, -0.1, 0.1, 0, -0.1, 0.1, -0.1, 0.1], label: 'Roll', fill:false}
+                    ];                
+
+                    widget.pitchMax = widgetSetting.data.pitchMax;
+                    widget.pitchMin = widgetSetting.data.pitchMin;
+                    widget.rollMax = widgetSetting.data.rollMax;
+                    widget.rollMin = widgetSetting.data.rollMin;
+
+                    output.push(widget);
+
+                    tmp[widget.sensorId] = idx;
+
+                    if(idx === (widgets.length - 1)){
+                        this.widgetSensorDirectory = tmp;
+                        this.sensorWidgets = output;
+                        this.iniateWebSockets();
+                    };
+                });                
             });
 
-            this.widgetSensorDirectory = tmp;
-            this.sensorWidgets = output;
-            this.iniateWebSockets();
+
         });
     }  
+
+    public onIntervalSelect(newValue) {
+        this.yLabelPlaceholderLimit = newValue;
+        this.connection.unsubscribe();
+        this.fetchWidgets();
+        this.lineChartLabels = this.generateYLabel(this.yLabelPlaceholderLimit, true);        
+    }    
 
     public createWidget():void{
 		this._widgetService.create(this.newWidget)
@@ -222,6 +277,11 @@ export class DashComponent implements OnInit {
 		});    
     }
 
+    public systemExecute(type) {
+        console.log(type);
+        this._sensorStreamService.sendMessage('reboot'); 
+    }
+
     private clearAddSensorWidgetForm():void{
         this.newWidget =  {
             sensorId: '',
@@ -236,39 +296,161 @@ export class DashComponent implements OnInit {
             this.connection.unsubscribe();
         } 
 
+        var pitchTmpData2 = this.generateYLabel(this.yLabelPlaceholderLimit, false);
+        var rollTmpData2 = this.generateYLabel(this.yLabelPlaceholderLimit, false);
+        var headingTmpData2 = this.generateYLabel(this.yLabelPlaceholderLimit, false);
+
         this.connection = this._sensorStreamService.getMessages().subscribe(message => {
             var tmp = message.toString();
             var buffer = tmp.split(',');
             var sensorId = buffer[0].toString();
+
+            var battery = parseFloat(buffer[4]) || 0;
             var roll = parseFloat(buffer[3]);
             var pitch = parseFloat(buffer[2]);
             var heading = parseFloat(buffer[1]);
 
-            this.pitchTmpData.unshift(this.radiansToDegrees(pitch));
-            this.pitchTmpData.pop();
+            pitchTmpData2.unshift(pitch);
+            pitchTmpData2.pop();
 
-            this.rollTmpData.unshift(this.radiansToDegrees(roll));
-            this.rollTmpData.pop();
-            
-            this.headingTmpData.unshift(this.radiansToDegrees(heading));
-            this.headingTmpData.pop();            
+            rollTmpData2.unshift(roll);
+            rollTmpData2.pop();
 
-            const pitchClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart));
-            pitchClone[0].data = this.pitchTmpData;
+            headingTmpData2.unshift(heading);
+            headingTmpData2.pop();
+
+            this.cleanSensorWidgets();
+
+            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].battery = this.calculateBattery(battery);
+
+            var pitchClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart));
+            pitchClone[0].data = pitchTmpData2;
             this.sensorWidgets[this.widgetSensorDirectory[sensorId]].pitchChart = pitchClone;
             
-            const rollClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart));
-            rollClone[0].data = this.rollTmpData;
-            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart = rollClone;             
+            var rollClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart));
+            rollClone[0].data = rollTmpData2;
+            this.sensorWidgets[this.widgetSensorDirectory[sensorId]].rollChart = rollClone;    
 
             const headingClone = JSON.parse(JSON.stringify(this.sensorWidgets[this.widgetSensorDirectory[sensorId]].headingChart));
-            headingClone[0].data = this.headingTmpData;
+            headingClone[0].data = headingTmpData2;
             this.sensorWidgets[this.widgetSensorDirectory[sensorId]].headingChart = headingClone;               
         });        
+    }
+
+    public calculateAcceleration(final:any, initial:any):any{
+        var result;
+
+        result = ((final - initial)/1).toFixed(2);
+        result = Math.abs(result);
+
+        return result;
+    }
+
+    private calculateBattery(battery:any){
+        var result;
+        var maxVoltage = 12;
+        var minVoltage = 10;
+
+        if(battery <= maxVoltage){
+            result = ( (battery - minVoltage) / ( maxVoltage - minVoltage) ) * 100;
+            result = Math.floor(result);
+        }else{
+            result = 100;
+        }
+
+        return result;
+    }
+
+    private cleanSensorWidgets(){
+        this.sensorWidgets[0].pitchChart[0].data = [0,0,0,0,0,0,0,0,0,0];
+        this.sensorWidgets[0].rollChart[0].data = [0,0,0,0,0,0,0,0,0,0];
+        this.sensorWidgets[0].headingChart[0].data = [0,0,0,0,0,0,0,0,0,0];
+        if(this.sensorWidgets[1]){
+            this.sensorWidgets[1].pitchChart[0].data = [0,0,0,0,0,0,0,0,0,0];
+            this.sensorWidgets[1].rollChart[0].data = [0,0,0,0,0,0,0,0,0,0];   
+            this.sensorWidgets[1].headingChart[0].data = [0,0,0,0,0,0,0,0,0,0];    
+        }    
     }    
 
-    ngOnInit() {
-        this.fetchWidgets();       
+    public parseData(data:any):any{
+        let output = 0;
+
+        if(data[0].data[0]){
+            output = data[0].data[0];            
+        }
+
+        return output;
+    }
+
+    public getBatteryStyle(data:any){
+        let color;
+
+        if(data > 50 && data <= 100){
+            color = 'green';
+        }else if(data > 25 && data <= 50){
+            color = 'orange';
+        }else{
+            color = 'red';
+        } 
+
+        return color;
+    }
+
+    public getBatteryIndicator(data:any){
+        let level = 'fa fa-battery-1';
+
+        if(data > 90 && data <= 100){
+            level = 'fa fa-battery-4';
+        }else if(data > 60 && data <= 89){
+            level = 'fa fa-battery-3';
+        }else if(data > 30 && data <= 59){
+            level = 'fa fa-battery-2';
+        }else if(data > 5 && data <= 29){
+            level = 'fa fa-battery-1';
+        }else{
+            level = 'fa fa-battery-0';
+        }         
+
+        return level;
+    }    
+
+    public getStyle(data:any, type:string) {
+        let color = "";
+        let currentValue = data[type + 'Chart'][0].data[0];
+        let threshold = {
+            pitchMax : data.pitchMax,
+            pitchMin : data.pitchMin,
+            rollMax : data.rollMax,
+            rollMin : data.rollMin
+        }
+
+        if(currentValue >= threshold[type + 'Max'] || currentValue <= threshold[type + 'Min']){
+            color = "red";
+        }else if(currentValue >= (threshold[type + 'Max'] - (threshold[type + 'Max'] * .20)) || currentValue <= (threshold[type + 'Min'] - threshold[type + 'Min'] * .20)){
+            color = "orange";
+        }
+
+        return color;
+    }
+    
+    private syncTime(){
+        var data = new Date();
+        var timeData;
+        timeData = data.toString();
+        data = timeData.split(' ');
+        timeData = data[0] + ' ' + data[1] + ' ' + data[2] + ' ' + data[4] + ' UTC ' + data[3];        
+
+        console.log(timeData);
+
+        this._helperService.setTime(timeData)
+        .subscribe(data => {
+            console.log(data);
+        });        
+    }
+
+    ngOnInit() {        
+        this.fetchWidgets();
+        this.lineChartLabels = this.generateYLabel(this.yLabelPlaceholderLimit, true);
     }
 
 	ngOnDestroy() {

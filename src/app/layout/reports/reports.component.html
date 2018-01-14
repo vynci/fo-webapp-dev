@@ -7,7 +7,6 @@
                     <label for="" style="margin-right: 5px;"><b>From:</b></label>
                     <button type="button" class="btn btn-outline-primary btn-block"  (click)="openDateFilterModal('From'); open(content)">{{formatDate(dateFilter.from)}}</button>
                 </div>                
-
             </div>
         </form>
     </div>
@@ -53,12 +52,22 @@
                     </div>
                     <div class="col col-sm-6" style="text-align:right;">
                         <!-- <button type="button" class="btn btn-sm btn-outline-danger">PDF</button> -->
-                        <button type="button" [disabled]="sensorLogs == 0" (click)="downloadCSV()" class="btn btn-sm btn-outline-warning">CSV</button>
+                        <button type="button" [disabled]="sensorLogs == 0" (click)="downloadCSV()" class="btn btn-sm btn-outline-warning">{{csvButtonLabel}}</button>
                     </div>
                 </div>                
             </div>
             <div class="card-block table-responsive">
-                <div *ngIf="sensorLogs != 0" class="row">
+                <div style="text-align:center;" *ngIf="sensorLogs != 0 && !isLoading">
+                    <button type="button" *ngIf="!isShowGraph" (click)="showGraph()" class="btn btn-primary">{{showGraphButtonLabel}}</button>
+                    <button type="button" *ngIf="isShowGraph" (click)="hideGraph()" class="btn btn-primary">Hide Graph</button>
+                </div>
+
+                <div *ngIf="isShowGraph">
+                    <canvas baseChart height="90" [datasets]="chartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)">
+                    </canvas>                    
+                </div>
+
+                <div *ngIf="sensorLogs != 0 && !isLoading" class="row">
                     <div class="col col-sm-9"></div>                    
                     <div class="col col-sm-3">
                         <label for=""><b>Rows per page</b></label>
@@ -73,28 +82,31 @@
                 </div>  
                 <br>              
                 <div>
-                    <p *ngIf="sensorLogs == 0" style="text-align:center;">No Results Found. Please try again with other sensors or date range.</p>
+                    <p *ngIf="sensorLogs == 0 && !isLoading" style="text-align:center;">No Results Found. Please try again with other sensors or date range.</p>
+                    <p *ngIf="isLoading" style="text-align:center;">Loading...</p>
                 </div>
-                <table *ngIf="sensorLogs != 0" class="table table-bordered table-hover table-striped">
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Heading</th>
-                        <th>Pitch</th>
-                        <th>Roll</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let log of sensorLogs">
-                            <td>{{formatDate(log.createdDate)}}</td>
-                            <td>{{log.heading}}</td>
-                            <td>{{log.pitch}}</td>
-                            <td>{{log.roll}}</td>
-                        </tr>                                                                                                       
-                    </tbody>
-                </table>
-                <ngb-pagination *ngIf="sensorLogs != 0" [collectionSize]="collectionSize" [(page)]="currentPage" (pageChange)="onPageChange($event)" [pageSize]="tableRowLimit" [maxSize]="5" [rotate]="true" [boundaryLinks]="true"></ngb-pagination>
-                <span>Total Results: <b>{{collectionSize || 0}}</b></span>
+                <div *ngIf="sensorLogs != 0 && !isLoading">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th style="color:gray">Heading</th>
+                            <th style="color:#2ecc71">Pitch</th>
+                            <th style="color:#3498db">Roll</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let log of sensorLogs">
+                                <td>{{formatDate(log.createdDate)}}</td>
+                                <td>{{log.heading}}°</td>
+                                <td>{{log.pitch}}°</td>
+                                <td>{{log.roll}}°</td>
+                            </tr>                                                                                                       
+                        </tbody>
+                    </table>
+                    <ngb-pagination *ngIf="sensorLogs != 0" [collectionSize]="collectionSize" [(page)]="currentPage" (pageChange)="onPageChange($event)" [pageSize]="tableRowLimit" [maxSize]="5" [rotate]="true" [boundaryLinks]="true"></ngb-pagination>
+                    <span>Total Results: <b>{{collectionSize || 0}}</b></span>                    
+                </div>
             </div>
         </div>        
     </div>

@@ -8,7 +8,8 @@ const routes: Routes = [
         children: [
             { path: 'dashboard', loadChildren: './dash/dash.module#DashModule' },
             { path: 'reports', loadChildren: './reports/reports.module#ReportsModule' },
-            { path: 'settings', loadChildren: './form/form.module#FormModule' }
+            { path: 'settings', loadChildren: './form/form.module#FormModule' },
+            { path: 'kiosk', loadChildren: './kiosk/kiosk.module#KioskModule' }
         ]
     }
 ];

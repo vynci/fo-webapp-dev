@@ -1,0 +1,35 @@
+.value-container {
+    text-align: center;
+    border: 2px solid;
+    padding-top: 20px;
+    margin-bottom: 30px;
+}
+
+.sensor-value {
+    font-size: 36px;    
+    font-weight: bold;
+}
+
+.label-container {
+    font-size: 16px;
+    color: white;
+    padding-bottom: 1px;
+    padding-top: 1px;
+    font-weight: bold;
+}
+
+.label-blue {
+    background: blue;
+}
+
+.label-green {
+    background: green;
+}
+
+.label-orange {
+    background: orange;
+}
+
+.label-gray {
+    background: gray;
+}

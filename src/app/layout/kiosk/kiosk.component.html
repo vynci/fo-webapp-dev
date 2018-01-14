@@ -1,0 +1,46 @@
+<div>
+    <div class="row">
+        <div class="col col-sm-4">
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.roll}}°</div>
+                <div class="label-container label-blue">Roll</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.pitch}}°</div>
+                <div class="label-container label-green">Pitch</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.heading}}°</div>
+                <div class="label-container label-orange">Heading</div>
+            </div>
+        </div>
+        <div class="col col-sm-4">
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.rollAcceleration}} °/s<sup>2</sup></div>
+                <div class="label-container label-blue">Roll Acceleration</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.pitchAcceleration}} °/s<sup>2</sup></div>
+                <div class="label-container label-green">Pitch Acceleration</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.headingAcceleration}} °/s<sup>2</sup></div>
+                <div class="label-container label-orange">Heading Acceleration</div>
+            </div>            
+        </div>
+        <div class="col col-sm-4">
+            <div class="value-container">
+                <div class="sensor-value">87%</div>
+                <div class="label-container label-gray">Battery Status</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">9.5 Hz</div>
+                <div class="label-container label-gray">Data Rate</div>
+            </div>
+            <div class="value-container">
+                <div class="sensor-value">{{sensorReadings.rssi}} RSSI</div>
+                <div class="label-container label-gray">Signal Strength</div>
+            </div>            
+        </div>
+    </div>
+</div>

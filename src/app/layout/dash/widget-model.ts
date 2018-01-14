@@ -8,4 +8,8 @@ export class WidgetModel {
     headingChart: any;    
     pitchChart: any;
     rollChart: any;    
+    pitchAcceleration: any;
+    rollAcceleration: any;
+    headingAcceleration: any;
+    battery: any;
 }
