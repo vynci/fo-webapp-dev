@@ -1,31 +1,105 @@
 <div>
+    <div class="row control-header"> 
+        <div class="col col-sm-4"></div>
+        <div class="col col-sm-4">           
+        </div>
+        <div class="col col-sm-4">
+            <div class="row">
+                <div class="col col-sm-6">
+                    <select class="form-control" [ngModel]="selectedDashboard" (ngModelChange)="onDashboardSelect($event)" name="sel2">
+                        <option [value]="1001">Orientus A30</option>                    
+                        <option [value]="1002">MPU6050</option>
+                        <option [value]="1003">AXL3050</option>
+                    </select>                     
+                </div>
+                <div class="col col-sm-6">
+                    <button type="button" class="btn btn-primary btn-block" (click)="open(addWidgetContent, 0, null, 'add')"><i class="fa fa-plus"></i> Add Widget</button>
+                </div>
+            </div>            
+        </div>
+    </div>
     <div class="row">
         <div class="col col-sm-4">
             <div class="component-container graph-height">
-                <div class="component-header label-green">Pitch: <strong>{{sensorWidget.pitchChart[0].data[0] || '0'}} °</strong></div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.pitchChart"  [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                <div class="component-header label-green">
+                    <div class="row">
+                        <div class="col col-sm-4">Pitch: <strong>{{sensorWidget.pitchChart[0].data[0] || '0'}} °</strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.pitch.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.pitch.average}} °</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'pitch', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.pitchChart"  [labels]="graphSettings.pitch.yaxis" [options]="graphSettings.pitch.lineChart" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
             </div>
             <div class="component-container graph-height">
-                <div class="component-header label-blue">Roll: {{sensorWidget.rollChart[0].data[0] || '0'}} °</div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.rollChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
+                <div class="component-header label-blue">
+                    <div class="row">
+                        <div class="col col-sm-4">Roll: <strong>{{sensorWidget.rollChart[0].data[0] || '0'}} °</strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.roll.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.roll.average}} °</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'roll', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>                    
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.rollChart" [labels]="graphSettings.roll.yaxis" [options]="graphSettings.roll.lineChart" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
             </div>
             <div class="component-container graph-height">
-                <div class="component-header label-orange">Heading: {{sensorWidget.headingChart[0].data[0] || '0'}} °</div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.headingChart" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                <div class="component-header label-orange">
+                    <div class="row">
+                        <div class="col col-sm-4">Heading: <strong>{{sensorWidget.headingChart[0].data[0] || '0'}} °</strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.heading.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.heading.average}}</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'heading', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>                    
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.headingChart" [labels]="graphSettings.heading.yaxis" [options]="graphSettings.heading.lineChart" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
             </div>
         </div>
+
         <div class="col col-sm-4">
             <div class="component-container graph-height">
-                <div class="component-header label-green">Pitch Acceleration: <strong>{{sensorWidget.pitchAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.pitchAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                <div class="component-header label-green">
+                    <div class="row">
+                        <div class="col col-sm-4">Pitch Accel: <strong>{{sensorWidget.pitchAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.pitchAcceleration.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.pitchAcceleration.average}}</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'pitchAcceleration', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>                    
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.pitchAccelerationChart" [labels]="graphSettings.pitchAcceleration.yaxis" [options]="graphSettings.pitchAcceleration.lineChart" [colors]="pitchChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
             </div>
             <div class="component-container graph-height">
-                <div class="component-header label-blue">Roll Acceleration <strong>{{sensorWidget.rollAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.rollAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
+                <div class="component-header label-blue">
+                    <div class="row">
+                        <div class="col col-sm-4">Roll Accel: <strong>{{sensorWidget.rollAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.rollAcceleration.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.rollAcceleration.average}}</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'rollAcceleration', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>                    
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.rollAccelerationChart" [labels]="graphSettings.rollAcceleration.yaxis" [options]="graphSettings.rollAcceleration.lineChart" [colors]="rollChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>                
             </div>
             <div class="component-container graph-height">
-                <div class="component-header label-orange">Heading Acceleration <strong>{{sensorWidget.headingAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
-                <canvas baseChart height="115" [datasets]="sensorWidget.headingAccelerationChart" [labels]="lineChartLabels" [options]="lineChartAccelerationOptions" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
+                <div class="component-header label-orange">
+                    <div class="row">
+                        <div class="col col-sm-4">Heading Accel: <strong>{{sensorWidget.headingAccelerationChart[0].data[0] || '0'}} °/s<sup>2</sup></strong></div>
+                        <div class="col col-sm-3">Max: <strong>{{sensorMaxAverage.headingAcceleration.max}}</strong></div>
+                        <div class="col col-sm-3">Ave: <strong>{{sensorMaxAverage.headingAcceleration.average}}</strong></div>
+                        <div class="col col-sm-2" style="text-align:center;">
+                            <span class="component-setting" (click)="open(editWidgetContent, 1, 'headingAcceleration', 'edit')"><i class="fa fa-cog"></i></span> 
+                        </div>
+                    </div>                    
+                </div>
+                <canvas baseChart height="115" [datasets]="sensorWidget.headingAccelerationChart" [labels]="graphSettings.headingAcceleration.yaxis" [options]="graphSettings.headingAcceleration.lineChart" [colors]="headingChartColor" [legend]="lineChartLegend" [chartType]="lineChartType" (chartHover)="chartHovered($event)" (chartClick)="chartClicked($event)"></canvas>
             </div>        
         </div>
         <div class="col col-sm-4">
@@ -44,11 +118,108 @@
                 </div>
             </div>
             <div class="component-container non-graph-height">
-                <div class="component-header label-gray">Console</div>
-                <div class="component-console"></div>    
+                <div class="component-header label-gray">
+                    <div class="row">
+                        <div class="col col-sm-3"><strong>Console</strong> </div>                    
+                        <div class="col col-sm-3">Batt: <strong>100%</strong></div>
+                        <div class="col col-sm-3">DR: <strong>9.5 Hz</strong></div>
+                        <div class="col col-sm-3">SS: <strong>{{sensorReadings.rssi}} RSSI</strong></div>  
+                    </div>                  
+                </div>
+                <div class="component-console console-setting">
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
+                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>                                                            
+                </div>    
             </div>            
         </div>
     </div>
     <div class="row"></div>
     <div class="row"></div>
 </div>
+
+<ng-template #editWidgetContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title"><span style="text-transform:capitalize;">{{widgetModalTitle}}</span>  Graph Settings</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <h5>Treshold Indicator Values</h5>
+        <br>
+        <div class="row">
+            <div class="col col-sm-6">
+                <form role="form">
+                    <fieldset class="form-group">
+                        <label>Minimum Angle</label>
+                        <input type="number" name="rollMin" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>                           
+                </form> 
+            </div>  
+            <div class="col col-sm-6">
+                <form role="form">
+                    <fieldset class="form-group">
+                        <label>Maximum Angle</label>
+                        <input type="number" name="rollMax" max="180" min="-180" class="form-control" placeholder="0">
+                    </fieldset>                         
+                </form> 
+            </div>  
+        </div>
+        <br>
+        <h5>Timeline Interval</h5>
+        <br>        
+        <div>
+            <select class="form-control" [ngModel]="selectedInterval" (ngModelChange)="onIntervalSelect($event)" name="sel2">
+                <option [value]="1000">1 Second</option>                    
+                <option [value]="60000">1 Minute</option>
+                <option [value]="120000">2 Minutes</option>
+                <option [value]="180000">3 Minutes</option>
+                <option [value]="240000">4 Minutes</option>
+                <option [value]="300000">5 Minutes</option>
+            </select>             
+        </div>                               
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="saveGraphSetting(); c('Close click')">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template>
+
+<ng-template #addWidgetContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title">Add Sensor Widget</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form role="form">
+            <fieldset class="form-group">
+                <label>ID</label>
+                <input class="form-control" placeholder="ex: 1234-5678-90" [(ngModel)]="newWidget.sensorId" name="sensorId" >
+            </fieldset>
+            <fieldset class="form-group">
+                <label>Name</label>
+                <input class="form-control" placeholder="ex: Sensor A" [(ngModel)]="newWidget.name" name="name" >
+            </fieldset>                            
+        </form>                                
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="createWidget(); c('Close click')">Save</button>
+        <button type="button" class="btn btn-secondary" (click)="c('Close click')">Cancel</button>
+    </div>
+</ng-template>

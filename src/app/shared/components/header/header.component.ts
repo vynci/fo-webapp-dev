@@ -17,7 +17,13 @@ export class HeaderComponent implements OnInit {
         });
     }
 
-    ngOnInit() {}
+    public isKiosk:boolean = false;
+
+    ngOnInit() {
+        if(this.router.url === '/kiosk'){
+            this.isKiosk = true;
+        }  
+    }
 
     toggleSidebar() {
         const dom: any = document.querySelector('body');

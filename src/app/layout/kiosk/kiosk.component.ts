@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { HelperService } from '../../services/helper.service';
-import { SensorStreamService } from './sensorStream.service';
+import { SensorStreamService } from '../../services/sensorStream.service';
 
 @Component({
     selector: 'app-kiosk',
@@ -30,7 +30,7 @@ export class KioskComponent implements OnInit {
     }
 
     private iniateWebSockets(){
-        this.connection = this._sensorStreamService.getMessages().subscribe(message => {
+        this.connection = this._sensorStreamService.getMessages('1001').subscribe(message => {
             var tmp = message.toString();
             var buffer = tmp.split(',');
             var sensorId = buffer[0].toString();

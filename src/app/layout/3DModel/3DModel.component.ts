@@ -75,9 +75,9 @@ export class ThreeModelComponent implements AfterViewInit {
    */
   private animateCube() {
     if(this.boat){
-    this.boat.rotation.x = this.rotationSpeedX * (Math.PI / 180);
-    this.boat.rotation.y = this.rotationSpeedY * (Math.PI / 180);
-    this.boat.rotation.z = this.rotationSpeedZ * (Math.PI / 180);
+      this.boat.rotation.x = this.rotationSpeedX * (Math.PI / 180);
+      this.boat.rotation.y = this.rotationSpeedY * (Math.PI / 180);
+      this.boat.rotation.z = this.rotationSpeedZ * (Math.PI / 180);
     }
 
   }

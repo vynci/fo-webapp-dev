@@ -11,10 +11,10 @@ export class SensorStreamService {
     return true;
   }
   
-  getMessages() {
+  getMessages(id:string) {
     let observable = new Observable(observer => {
       this.socket = io(this.url);
-      this.socket.on('fromPublicServer', (data) => {
+      this.socket.on('fromPublicServer/' + id, (data) => {
         observer.next(data);    
       });
       return () => {

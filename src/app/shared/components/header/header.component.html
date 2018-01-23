@@ -1,19 +1,14 @@
 <div class="pos-f-t fixed-top header">
     <nav class="navbar navbar-inverse bg-inverse navbar-toggleable-md">
-        <button class="navbar-toggler navbar-toggler-right" (click)="toggleSidebar()">
-            <span class="navbar-toggler-icon"></span>
-        </button>
         <div class="row">
             <div class="col col-sm-6">
                 <a class="navbar-brand" href="javascript:void(0)">FIRST OCEAN - SOLUTIONS</a>
             </div>
-            <div class="col col-sm-6" style="text-align:right;">
+            <div class="col col-sm-6" style="text-align:right;" *ngIf="!isKiosk">
                 <a class="navbar-brand link-container link-selected" href="javascript:void(0)">Dashboard</a>
                 <a class="navbar-brand link-container" href="javascript:void(0)">Reports</a>
                 <a class="navbar-brand" href="javascript:void(0)">Settings</a>
             </div>
-        </div>
-        <div class="collapse navbar-collapse">
         </div>
     </nav>
 </div>

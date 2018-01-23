@@ -10,7 +10,8 @@
     height: 30px;
     margin-bottom: 10px;
     color: white;
-    text-align: center;
+    text-align: left;
+    padding-left: 10px;
     padding-top: 2px;
     border-bottom: 1px solid #444;
 }
@@ -23,6 +24,22 @@
 .component-console {
     background: black;
     height: 92%
+}
+
+.console-setting {
+    color: #2ecc71;
+    padding: 8px;
+}
+
+.component-indicators {
+    margin-right: 10px;
+}
+
+.component-setting {
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .label-blue {
@@ -41,4 +58,8 @@
     height: 8% !important;
     margin-bottom: 0px !important;
     background: gray;
+}
+
+.control-header {
+    margin-bottom: 20px;
 }
