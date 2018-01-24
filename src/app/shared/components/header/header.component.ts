@@ -19,10 +19,36 @@ export class HeaderComponent implements OnInit {
 
     public isKiosk:boolean = false;
 
+    public select:any = {
+        dashboard2 : '',
+        reports : '',
+        settings : ''
+    }
+
+    public selectPage(page:any){
+        this.clearSelectedLink();
+        this.select[page] = 'link-selected';
+    }
+
+    private clearSelectedLink() {
+        this.select = {
+            dashboard2 : '',
+            reports : '',
+            settings : ''
+        }        
+    }
+
     ngOnInit() {
         if(this.router.url === '/kiosk'){
             this.isKiosk = true;
-        }  
+        }
+
+        var state:any = this.router.url;
+        state = state.split('/');
+        state = state[1];
+
+        this.select[state] = 'link-selected';
+        console.log(this.select);
     }
 
     toggleSidebar() {

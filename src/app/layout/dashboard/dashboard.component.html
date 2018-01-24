@@ -126,23 +126,8 @@
                         <div class="col col-sm-3">SS: <strong>{{sensorReadings.rssi}} RSSI</strong></div>  
                     </div>                  
                 </div>
-                <div class="component-console console-setting">
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>    
-                    <div><strong>02:05:26 1/24/2018</strong> : Pitch above level</div>                                                            
+                <div #console class="component-console console-setting">
+                    <div *ngFor="let item of consoleList"><strong>{{item.time}}</strong> : <span [style.color]='item.color'>{{item.value}}</span></div>                                                          
                 </div>    
             </div>            
         </div>
@@ -166,7 +151,7 @@
                 <form role="form">
                     <fieldset class="form-group">
                         <label>Minimum Angle</label>
-                        <input type="number" name="rollMin" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentMinMax.minimum" name="rollMin" max="0" min="-180" class="form-control" placeholder="0">
                     </fieldset>                           
                 </form> 
             </div>  
@@ -174,7 +159,7 @@
                 <form role="form">
                     <fieldset class="form-group">
                         <label>Maximum Angle</label>
-                        <input type="number" name="rollMax" max="180" min="-180" class="form-control" placeholder="0">
+                        <input type="number" [(ngModel)]="currentMinMax.maximum" name="rollMax" max="180" min="0" class="form-control" placeholder="0">
                     </fieldset>                         
                 </form> 
             </div>  

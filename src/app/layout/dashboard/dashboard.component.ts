@@ -1,22 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { routerTransition } from '../../router.animations';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { HelperService } from '../../services/helper.service';
 import { SensorStreamService } from '../../services/sensorStream.service';
 import { WidgetModel } from '../../models/widget-model';
+import { WidgetSettingService } from '../../services/widgetSetting.service';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     animations: [routerTransition()],
-    providers: [HelperService, NgbModal, SensorStreamService]
+    providers: [HelperService, NgbModal, SensorStreamService, WidgetSettingService]
 })
 export class DashboardComponent implements OnInit {
+    @ViewChild('console') private myScrollContainer: ElementRef;
+
     constructor(
         private _helperService: HelperService,
         private modalService: NgbModal,
-        private _sensorStreamService: SensorStreamService
+        private _sensorStreamService: SensorStreamService,
+        private _widgetSettingService: WidgetSettingService
     ) { }
 
     private connection;
@@ -27,6 +31,30 @@ export class DashboardComponent implements OnInit {
         dashboardId: '0',
         type: 'motion-sensor',
         description: 'default'
+    }
+
+    public consoleList:any = [];
+
+    public currentWidgetSetting:any = {
+        widgetId: '',
+        rollMin: -10,
+        rollMax: 10,
+        pitchMin: -20,
+        pitchMax: 20,
+        headingMin: -30,
+        headingMax: 80,
+        isDegrees: true
+    };
+
+    public currentMinMax:any = {
+        minimum : -30,
+        maximum : 30
+    }
+
+    public minMaxFlag:any = {
+        pitch : false,
+        roll : false,
+        heading : false
     }
 
     public sensorWidget:any = {
@@ -223,6 +251,10 @@ export class DashboardComponent implements OnInit {
             this.widgetModalTitle = title;
             this.currentGraphSetting = title;
             this.selectedInterval = this.graphSettings[title].interval;
+            this.currentMinMax = {
+                minimum : this.currentWidgetSetting[title + 'Min'],
+                maximum : this.currentWidgetSetting[title + 'Max']
+            }
         }
 
         this.modalService.open(content).result.then((result) => {
@@ -261,8 +293,18 @@ export class DashboardComponent implements OnInit {
     public saveGraphSetting() {
         this.graphSettings[this.currentGraphSetting].interval = this.selectedInterval
         this.graphSettings[this.currentGraphSetting].yaxis = this.generateYLabel(this.selectedInterval, true);
+
+        this.currentWidgetSetting[this.currentGraphSetting + 'Min'] = this.currentMinMax.minimum;
+        this.currentWidgetSetting[this.currentGraphSetting + 'Max'] = this.currentMinMax.maximum;
+
         this.connection.unsubscribe();
-        this.iniateWebSockets();        
+        this.iniateWebSockets();
+
+        // this._widgetSettingService.update(this.currentWidgetSetting)
+        // .subscribe(data => {
+        //     this.connection.unsubscribe();
+        //     this.iniateWebSockets();
+        // });    
     }
 
     public onIntervalSelect(newValue) {
@@ -296,6 +338,60 @@ export class DashboardComponent implements OnInit {
         }
     }
 
+    private getDateTime(date: Date) {
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    }
+
+    private appendToConsole(message:any, color:any) {
+        this.consoleList.push({
+            time : this.getDateTime(new Date()),
+            value : message.toString(),
+            color : color
+        });
+        this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight;                
+    }
+
+    private checkThreshold(sensorReadings) {
+        if(this.sensorReadings['roll'] > this.currentWidgetSetting.rollMax && !this.minMaxFlag['roll']) {
+            this.minMaxFlag['roll'] = true;
+            this.appendToConsole('Roll above maximum threshold.', 'red');
+        } else if(this.sensorReadings['roll'] < this.currentWidgetSetting.rollMin && !this.minMaxFlag['roll']){
+            this.minMaxFlag['roll'] = true;
+            this.appendToConsole('Roll below minimum threshold.', 'red');
+        } else if (this.sensorReadings['roll'] > this.currentWidgetSetting.rollMin && this.sensorReadings['roll'] < this.currentWidgetSetting.rollMax){
+            if (this.minMaxFlag['roll']) {
+                this.minMaxFlag['roll'] = false;
+                this.appendToConsole('Roll angle back to normal.', '');
+            }   
+        }
+
+        if(this.sensorReadings['pitch'] > this.currentWidgetSetting.pitchMax && !this.minMaxFlag['pitch']) {
+            this.minMaxFlag['pitch'] = true;
+            this.appendToConsole('Pitch above maximum threshold.', 'red');
+        } else if(this.sensorReadings['pitch'] < this.currentWidgetSetting.pitchMin && !this.minMaxFlag['pitch']){
+            this.minMaxFlag['pitch'] = true;
+            this.appendToConsole('Pitch below minimum threshold.', 'red');
+        } else if (this.sensorReadings['pitch'] > this.currentWidgetSetting.pitchMin && this.sensorReadings['pitch'] < this.currentWidgetSetting.pitchMax){
+            if (this.minMaxFlag['pitch']) {
+                this.minMaxFlag['pitch'] = false;
+                this.appendToConsole('Pitch angle back to normal.', '');
+            }   
+        }
+
+        if(this.sensorReadings['heading'] > this.currentWidgetSetting.headingMax && !this.minMaxFlag['heading']) {
+            this.minMaxFlag['heading'] = true;
+            this.appendToConsole('Heading above maximum threshold.', 'red');
+        } else if(this.sensorReadings['heading'] < this.currentWidgetSetting.headingMin && !this.minMaxFlag['heading']){
+            this.minMaxFlag['heading'] = true;
+            this.appendToConsole('Heading below minimum threshold.', 'red');
+        } else if (this.sensorReadings['heading'] > this.currentWidgetSetting.headingMin && this.sensorReadings['heading'] < this.currentWidgetSetting.headingMax){
+            if (this.minMaxFlag['heading']) {
+                this.minMaxFlag['heading'] = false;
+                this.appendToConsole('Heading angle back to normal.', '');
+            }   
+        }
+    }
+
     private iniateWebSockets(){
         var pitchTmpData2 = this.generateYLabel(this.graphSettings.pitch.interval, false);
         var rollTmpData2 = this.generateYLabel(this.graphSettings.roll.interval, false);
@@ -319,6 +415,8 @@ export class DashboardComponent implements OnInit {
             this.sensorReadings['headingAcceleration'] = parseFloat(buffer[4]);   
             
             this.sensorReadings['rssi'] = parseFloat(buffer[7]);
+
+            this.checkThreshold(this.sensorReadings);
 
             pitchTmpData2.unshift(this.sensorReadings['pitch']);
             pitchTmpData2.pop();
@@ -368,5 +466,6 @@ export class DashboardComponent implements OnInit {
 
     ngOnInit() {
         this.iniateWebSockets();
+        this.appendToConsole('Dashboard Initialized', '');
     }
 }
