@@ -14,7 +14,20 @@ export class SensorStreamService {
   getMessages(id:string) {
     let observable = new Observable(observer => {
       this.socket = io(this.url);
-      this.socket.on('fromPublicServer/' + id, (data) => {
+      this.socket.on('fromPublicServer/data/' + id, (data) => {
+        observer.next(data);    
+      });
+      return () => {
+        this.socket.disconnect();
+      };  
+    })     
+    return observable;
+  }  
+
+  heartBeat(id:string) {
+    let observable = new Observable(observer => {
+      this.socket = io(this.url);
+      this.socket.on('fromPublicServer/status/' + id, (data) => {
         observer.next(data);    
       });
       return () => {

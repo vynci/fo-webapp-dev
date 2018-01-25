@@ -14,7 +14,7 @@ export class SensorStreamService {
   getMessages() {
     let observable = new Observable(observer => {
       this.socket = io(this.url);
-      this.socket.on('fromPublicServer', (data) => {
+      this.socket.on('fromPublicServer/data/', (data) => {
         observer.next(data);    
       });
       return () => {

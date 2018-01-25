@@ -50,4 +50,10 @@ export class KioskComponent implements OnInit {
     ngOnInit() {
         this.iniateWebSockets();
     }
+
+	ngOnDestroy() {
+        if(this.connection){
+            this.connection.unsubscribe();
+        }        
+	}    
 }

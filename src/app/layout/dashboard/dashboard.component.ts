@@ -24,7 +24,9 @@ export class DashboardComponent implements OnInit {
     ) { }
 
     private connection;
+    private heartbeat;
     private currentGraphSetting:string;
+    private heartStatus:string = 'init';
 
     public newWidget:any = {
         sensorId: '',
@@ -464,8 +466,36 @@ export class DashboardComponent implements OnInit {
         });
     }
 
+    private setupHeartBeat(){    
+        this.heartbeat = this._sensorStreamService.heartBeat('1001').subscribe(message => {
+            console.log(message);
+            if(message !== 'healthy') {
+                if(this.heartStatus === 'init' || this.heartStatus === 'healthy') {
+                    this.appendToConsole('No incoming data (disconnected or out of range).', 'red');
+                    this.heartStatus = 'disconnected';                    
+                }
+            } else {
+                if(this.heartStatus === 'init' || this.heartStatus === 'disconnected') {
+                    this.appendToConsole('Datagram healthy.', '');
+                    this.heartStatus = 'healthy';
+                }
+            }
+        });
+    }
+
     ngOnInit() {
+        this.setupHeartBeat();
         this.iniateWebSockets();
         this.appendToConsole('Dashboard Initialized', '');
     }
+
+	ngOnDestroy() {
+        if(this.connection){
+            this.connection.unsubscribe();
+        }        
+
+        if(this.heartbeat) {
+            this.heartbeat.unsubscribe();
+        }
+	}    
 }

@@ -562,7 +562,7 @@ var SensorStreamService = (function () {
         var _this = this;
         var observable = new __WEBPACK_IMPORTED_MODULE_0_rxjs_Observable__["Observable"](function (observer) {
             _this.socket = __WEBPACK_IMPORTED_MODULE_1_socket_io_client__(_this.url);
-            _this.socket.on('fromPublicServer', function (data) {
+            _this.socket.on('fromPublicServer/data/', function (data) {
                 observer.next(data);
             });
             return function () {

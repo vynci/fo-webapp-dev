@@ -118,6 +118,11 @@ var KioskComponent = (function () {
     KioskComponent.prototype.ngOnInit = function () {
         this.iniateWebSockets();
     };
+    KioskComponent.prototype.ngOnDestroy = function () {
+        if (this.connection) {
+            this.connection.unsubscribe();
+        }
+    };
     return KioskComponent;
 }());
 KioskComponent = __decorate([

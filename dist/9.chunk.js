@@ -51,7 +51,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".graph-height {\n  height: 250px; }\n\n.non-graph-height {\n  height: 385px; }\n\n.component-header {\n  height: 30px;\n  margin-bottom: 10px;\n  color: white;\n  text-align: left;\n  padding-left: 10px;\n  padding-top: 2px;\n  border-bottom: 1px solid #444; }\n\n.component-container {\n  border: 1px solid #444;\n  margin-bottom: 20px; }\n\n.component-console {\n  background: black;\n  height: 92%; }\n\n.console-setting {\n  color: #2ecc71;\n  padding: 8px;\n  overflow-y: scroll; }\n\n.component-indicators {\n  margin-right: 10px; }\n\n.component-setting {\n  color: white;\n  cursor: pointer;\n  font-weight: bold;\n  font-size: 18px; }\n\n.label-blue {\n  background: #3498db; }\n\n.label-green {\n  background: #2ecc71; }\n\n.label-orange {\n  background: #f0ad4e; }\n\n.label-gray {\n  height: 8% !important;\n  margin-bottom: 0px !important;\n  background: gray; }\n\n.control-header {\n  margin-bottom: 20px; }\n", ""]);
+exports.push([module.i, ".graph-height {\n  height: 250px; }\n\n.non-graph-height {\n  height: 385px; }\n\n.component-header {\n  height: 30px;\n  margin-bottom: 10px;\n  color: white;\n  text-align: left;\n  padding-left: 10px;\n  padding-top: 2px;\n  border-bottom: 1px solid #444; }\n\n.component-container {\n  border: 1px solid #444;\n  margin-bottom: 20px; }\n\n.component-console {\n  background: black;\n  height: 92%; }\n\n.console-setting {\n  color: #2ecc71;\n  padding: 8px;\n  overflow-y: scroll;\n  font-size: 14px; }\n\n.component-indicators {\n  margin-right: 10px; }\n\n.component-setting {\n  color: white;\n  cursor: pointer;\n  font-weight: bold;\n  font-size: 18px; }\n\n.label-blue {\n  background: #3498db; }\n\n.label-green {\n  background: #2ecc71; }\n\n.label-orange {\n  background: #f0ad4e; }\n\n.label-gray {\n  height: 8% !important;\n  margin-bottom: 0px !important;\n  background: gray; }\n\n.control-header {\n  margin-bottom: 20px; }\n", ""]);
 
 // exports
 
@@ -93,6 +93,7 @@ var DashboardComponent = (function () {
         this.modalService = modalService;
         this._sensorStreamService = _sensorStreamService;
         this._widgetSettingService = _widgetSettingService;
+        this.heartStatus = 'init';
         this.newWidget = {
             sensorId: '',
             dashboardId: '0',
@@ -488,9 +489,36 @@ var DashboardComponent = (function () {
             _this.processMaxAverage();
         });
     };
+    DashboardComponent.prototype.setupHeartBeat = function () {
+        var _this = this;
+        this.heartbeat = this._sensorStreamService.heartBeat('1001').subscribe(function (message) {
+            console.log(message);
+            if (message !== 'healthy') {
+                if (_this.heartStatus === 'init' || _this.heartStatus === 'healthy') {
+                    _this.appendToConsole('No incoming data (disconnected or out of range).', 'red');
+                    _this.heartStatus = 'disconnected';
+                }
+            }
+            else {
+                if (_this.heartStatus === 'init' || _this.heartStatus === 'disconnected') {
+                    _this.appendToConsole('Datagram healthy.', '');
+                    _this.heartStatus = 'healthy';
+                }
+            }
+        });
+    };
     DashboardComponent.prototype.ngOnInit = function () {
+        this.setupHeartBeat();
         this.iniateWebSockets();
         this.appendToConsole('Dashboard Initialized', '');
+    };
+    DashboardComponent.prototype.ngOnDestroy = function () {
+        if (this.connection) {
+            this.connection.unsubscribe();
+        }
+        if (this.heartbeat) {
+            this.heartbeat.unsubscribe();
+        }
     };
     return DashboardComponent;
 }());
