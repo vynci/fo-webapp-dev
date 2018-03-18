@@ -7,9 +7,7 @@
             <div class="row">
                 <div class="col col-sm-6">
                     <select class="form-control" [ngModel]="selectedDashboard" (ngModelChange)="onDashboardSelect($event)" name="sel2">
-                        <option [value]="1001">Orientus A30</option>                    
-                        <option [value]="1002">MPU6050</option>
-                        <option [value]="1003">AXL3050</option>
+                        <option value="{{widget.sensorId}}" *ngFor="let widget of widgets">{{widget.name}}</option>
                     </select>                     
                 </div>
                 <div class="col col-sm-6">
@@ -121,9 +119,9 @@
                 <div class="component-header label-gray">
                     <div class="row">
                         <div class="col col-sm-3"><strong>Console</strong> </div>                    
-                        <div class="col col-sm-3">Batt: <strong>100%</strong></div>
-                        <div class="col col-sm-3">DR: <strong>9.5 Hz</strong></div>
-                        <div class="col col-sm-3">SS: <strong>{{sensorReadings.rssi}} RSSI</strong></div>  
+                        <div class="col col-sm-3"><i class="fa fa-battery"></i> : <strong>100%</strong></div>
+                        <div class="col col-sm-3"><i class="fa fa-exchange"></i> : <strong>10 Hz</strong></div>
+                        <div class="col col-sm-3"><i class="fa fa-signal"></i> : <strong>{{sensorReadings.rssi}} RSSI</strong></div>  
                     </div>                  
                 </div>
                 <div #console class="component-console console-setting">

@@ -5,13 +5,14 @@ import { HelperService } from '../../services/helper.service';
 import { SensorStreamService } from '../../services/sensorStream.service';
 import { WidgetModel } from '../../models/widget-model';
 import { WidgetSettingService } from '../../services/widgetSetting.service';
+import { WidgetService } from '../../services/widget.service';
 
 @Component({
     selector: 'app-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     animations: [routerTransition()],
-    providers: [HelperService, NgbModal, SensorStreamService, WidgetSettingService]
+    providers: [HelperService, NgbModal, SensorStreamService, WidgetSettingService, WidgetService]
 })
 export class DashboardComponent implements OnInit {
     @ViewChild('console') private myScrollContainer: ElementRef;
@@ -20,7 +21,8 @@ export class DashboardComponent implements OnInit {
         private _helperService: HelperService,
         private modalService: NgbModal,
         private _sensorStreamService: SensorStreamService,
-        private _widgetSettingService: WidgetSettingService
+        private _widgetSettingService: WidgetSettingService,
+        private _widgetService: WidgetService,
     ) { }
 
     private connection;
@@ -28,12 +30,23 @@ export class DashboardComponent implements OnInit {
     private currentGraphSetting:string;
     private heartStatus:string = 'init';
 
+    public widgets:any = [];
+
     public newWidget:any = {
         sensorId: '',
         dashboardId: '0',
         type: 'motion-sensor',
         description: 'default'
     }
+
+    public newWidgetSetting:any = {
+        widgetId: '',
+        rollMin: -90,
+        rollMax: 90,
+        pitchMin: -90,
+        pitchMax: 90,
+        isDegrees: true,
+    } 
 
     public consoleList:any = [];
 
@@ -122,7 +135,7 @@ export class DashboardComponent implements OnInit {
     public lineChartLegend: boolean = true;
     public lineChartLabels: Array<any> = ['0', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
     public selectedInterval:any = 1000;
-    public selectedDashboard:any = 1001;
+    public selectedDashboard:string;
 
     public widgetModalTitle:string;
 
@@ -300,7 +313,7 @@ export class DashboardComponent implements OnInit {
         this.currentWidgetSetting[this.currentGraphSetting + 'Max'] = this.currentMinMax.maximum;
 
         this.connection.unsubscribe();
-        this.iniateWebSockets();
+        this.iniateWebSockets(this.selectedDashboard);
 
         // this._widgetSettingService.update(this.currentWidgetSetting)
         // .subscribe(data => {
@@ -314,7 +327,12 @@ export class DashboardComponent implements OnInit {
     }       
 
     public onDashboardSelect(newValue) {
+        this.destroyWebsockets();
+
         this.selectedDashboard = newValue;
+        this.setupHeartBeat(newValue);
+        this.iniateWebSockets(newValue);
+        this.appendToConsole('Dashboard(' + newValue + ') Initialized', '');        
     }    
 
     private calculate(set:any): any{
@@ -394,7 +412,7 @@ export class DashboardComponent implements OnInit {
         }
     }
 
-    private iniateWebSockets(){
+    private iniateWebSockets(id:string){
         var pitchTmpData2 = this.generateYLabel(this.graphSettings.pitch.interval, false);
         var rollTmpData2 = this.generateYLabel(this.graphSettings.roll.interval, false);
         var headingTmpData2 = this.generateYLabel(this.graphSettings.heading.interval, false);
@@ -403,7 +421,7 @@ export class DashboardComponent implements OnInit {
         var rollAccelerationTmpData2 = this.generateYLabel(this.graphSettings.rollAcceleration.interval, false);;
         var headingAccelerationTmpData2 = this.generateYLabel(this.graphSettings.headingAcceleration.interval, false);;        
 
-        this.connection = this._sensorStreamService.getMessages('1001').subscribe(message => {
+        this.connection = this._sensorStreamService.getMessages(id).subscribe(message => {
             var tmp = message.toString();
             var buffer = tmp.split(',');
             var sensorId = buffer[0].toString();
@@ -466,9 +484,8 @@ export class DashboardComponent implements OnInit {
         });
     }
 
-    private setupHeartBeat(){    
-        this.heartbeat = this._sensorStreamService.heartBeat('1001').subscribe(message => {
-            console.log(message);
+    private setupHeartBeat(id:string){    
+        this.heartbeat = this._sensorStreamService.heartBeat(id).subscribe(message => {
             if(message !== 'healthy') {
                 if(this.heartStatus === 'init' || this.heartStatus === 'healthy') {
                     this.appendToConsole('No incoming data (disconnected or out of range).', 'red');
@@ -483,19 +500,61 @@ export class DashboardComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
-        this.setupHeartBeat();
-        this.iniateWebSockets();
-        this.appendToConsole('Dashboard Initialized', '');
+    public createWidget():void{
+		this._widgetService.create(this.newWidget)
+		.subscribe(data => {
+            this.newWidgetSetting.widgetId = data.data._id;
+            this._widgetSettingService.create(this.newWidgetSetting)
+            .subscribe(data => {
+                this.destroyWebsockets();
+                this.fetchWidgets();
+                this.clearAddSensorWidgetForm()
+            });            
+		});          
     }
 
-	ngOnDestroy() {
+    private clearAddSensorWidgetForm():void{
+        this.newWidget =  {
+            sensorId: '',
+            dashboardId: '0',
+            type: 'motion-sensor',
+            description: 'default'
+        }        
+    }    
+
+	private fetchWidgets():void{
+        this._widgetService.getAll()
+        .subscribe(data => {
+            let widgets = data.data;
+            let output = [];
+            var tmp = {};
+
+            this.widgets = widgets;
+            this.selectedDashboard = widgets[0].sensorId;
+    
+            this.setupHeartBeat(widgets[0].sensorId);
+            this.iniateWebSockets(widgets[0].sensorId);
+            this.appendToConsole('Dashboard(' + this.selectedDashboard  + ') Initialized', '');            
+
+            console.log(data);
+        });
+    }
+    
+    private destroyWebsockets() {
         if(this.connection){
             this.connection.unsubscribe();
         }        
 
         if(this.heartbeat) {
             this.heartbeat.unsubscribe();
-        }
+        }        
+    }
+
+    ngOnInit() {
+        this.fetchWidgets();
+    }
+
+	ngOnDestroy() {
+        this.destroyWebsockets();
 	}    
 }

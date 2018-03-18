@@ -228,7 +228,7 @@
     color: $navbar-inverse-active-color;
 
     @include hover-focus {
-      color: $navbar-inverse-active-color;
+      color: gray;
     }
   }
 
